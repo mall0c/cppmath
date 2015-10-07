@@ -166,6 +166,11 @@ namespace geometry
                 return x == p.x && y == p.y;
             }
 
+            constexpr operator bool() const
+            {
+                return x || y;
+            }
+
 
             template <class T2>
             constexpr operator Vector2<T2>() const
