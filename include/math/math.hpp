@@ -3,6 +3,7 @@
 
 //#define _USE_MATH_DEFINES
 #include <math.h>
+#include <algorithm>
 
 // Disable constexpr if not compiled with c++11 or Microsoft compiler is used.
 #if defined(_WIN32) || __cplusplus != 201103
@@ -37,6 +38,12 @@ namespace math
     constexpr int sign(T val)
     {
         return (T(0) < val) - (val < T(0));
+    }
+
+    template <typename T>
+    T clamp(const T& val, const T& min, const T& max)
+    {
+        return std::max(min, std::min(val, max));
     }
 }
 
