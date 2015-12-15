@@ -183,6 +183,12 @@ namespace geometry
             T x, y;
 
     };
+
+    template <class T>
+    Vector2<T> fromDirection(float length, float dir)
+    {
+        return Vector2<T>(length * cos(dir * M_PI / 180), length * sin(dir * M_PI / 180));
+    }
 }
 
 #endif
