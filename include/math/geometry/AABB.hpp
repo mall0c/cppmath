@@ -1,10 +1,9 @@
-#ifndef MATH_AABB_HPP
-#define MATH_AABB_HPP
+#ifndef CPPMATH_AABB_HPP
+#define CPPMATH_AABB_HPP
 
 #include "Vector2.hpp"
 
-// Microsoft compiler doesn't support constexpr
-#ifdef _WIN32
+#if (defined(__GNUC__) && __cplusplus < 201103) || (defined(_WIN32) && _MSC_VER<1900)
 #define constexpr
 #endif
 

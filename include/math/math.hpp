@@ -1,12 +1,12 @@
-#ifndef LIB_MATH_HPP
-#define LIB_MATH_HPP
+#ifndef CPPMATH_MATH_HPP
+#define CPPMATH_MATH_HPP
 
-//#define _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
 #include <math.h>
 #include <algorithm>
 
-// Disable constexpr if not compiled with c++11 or Microsoft compiler is used.
-#if defined(_WIN32) || __cplusplus != 201103
+// Disable constexpr if not compiled with c++11 or incompatible Microsoft compiler is used.
+#if (defined(__GNUC__) && __cplusplus < 201103) || (defined(_WIN32) && _MSC_VER<1900)
 #define constexpr const
 #endif
 

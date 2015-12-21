@@ -1,10 +1,9 @@
-#ifndef MATH_VECTOR_2_HPP
-#define MATH_VECTOR_2_HPP
+#ifndef CPPMATH_VECTOR_2_HPP
+#define CPPMATH_VECTOR_2_HPP
 
 #include <math.h>
 
-// Microsoft compiler doesn't support constexpr
-#ifdef _WIN32
+#if (defined(__GNUC__) && __cplusplus < 201103) || (defined(_WIN32) && _MSC_VER<1900)
 #define constexpr
 #endif
 
