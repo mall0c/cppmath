@@ -1,0 +1,18 @@
+set(CXX_STANDARD_REQUIRED OFF)
+
+macro(gen_test TESTNAME SOURCE)
+    add_executable(${TESTNAME} ${SOURCE})
+    # target_link_libraries(${TESTNAME} ${PROJECT_NAME})
+    add_test(NAME ${TESTNAME} COMMAND ${TESTNAME})
+    set_property(TARGET ${TESTNAME} PROPERTY CXX_STANDARD 11)
+endmacro()
+
+if(BUILD_GRAPHICAL_TEST)
+    add_executable(graphical_test graphical.cpp)
+    target_link_libraries(graphical_test sfml-graphics sfml-window sfml-system)
+    set_property(TARGET graphical_test PROPERTY CXX_STANDARD 11)
+endif()
+
+if(BUILD_TESTS)
+    gen_test(parallel_identical parallel_identical.cpp)
+endif()

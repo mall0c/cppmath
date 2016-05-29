@@ -7,12 +7,12 @@
 
 // Disable constexpr if not compiled with c++11 or incompatible Microsoft compiler is used.
 #if (defined(__GNUC__) && __cplusplus < 201103) || (defined(_WIN32) && _MSC_VER<1900)
-#define constexpr const
+#define constexpr
 #endif
 
 namespace math
 {
-    constexpr double pi = M_PI;
+    constexpr const double pi = M_PI;
 
     constexpr double radtodeg(double rad)
     {

@@ -21,6 +21,17 @@ namespace geometry
                 return Vector2<T>(x, y);
             }
 
+            void set(const T& a, const T& b)
+            {
+                x = a;
+                y = b;
+            }
+
+            void set(const T& val)
+            {
+                x = y = val;
+            }
+
             template <class T2>
             constexpr operator Point2<T2>() const
             {
@@ -28,7 +39,21 @@ namespace geometry
             }
 
             template <class T2>
-            Point2<T>& operator+=(const Vector2<T>& vec) const
+            Point2<T>& operator-=(const Vector2<T2>& vec) const
+            {
+                x -= vec.x;
+                y -= vec.y;
+                return *this;
+            }
+
+            template <class T2>
+            constexpr Point2<T> operator-(const Vector2<T2>& vec) const
+            {
+                return Point2<T>(x - vec.x, y - vec.y);
+            }
+
+            template <class T2>
+            Point2<T>& operator+=(const Vector2<T2>& vec) const
             {
                 x += vec.x;
                 y += vec.y;
@@ -36,13 +61,13 @@ namespace geometry
             }
 
             template <class T2>
-            constexpr Point2<T> operator+(const Vector2<T>& vec) const
+            constexpr Point2<T> operator+(const Vector2<T2>& vec) const
             {
                 return Point2<T>(x + vec.x, y + vec.y);
             }
 
             template <class T2>
-            constexpr Vector2<T> operator-(const Point2<T>& p2) const
+            constexpr Vector2<T> operator-(const Point2<T2>& p2) const
             {
                 return Vector2<T>(x - p2.x, y - p2.y);
             }
