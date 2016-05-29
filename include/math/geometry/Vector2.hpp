@@ -1,7 +1,8 @@
 #ifndef CPPMATH_VECTOR_2_HPP
 #define CPPMATH_VECTOR_2_HPP
 
-#include <math.h>
+#include "../math.hpp"
+#include "../TypeTraits.hpp"
 
 #if (defined(__GNUC__) && __cplusplus < 201103) || (defined(_WIN32) && _MSC_VER<1900)
 #define constexpr
@@ -14,8 +15,13 @@ namespace geometry
     {
         public:
             constexpr Vector2() : Vector2(0, 0) {}
-            constexpr Vector2(const Vector2<T>& vec) : Vector2(vec.x, vec.y) {}
             constexpr Vector2(const T& x_, const T& y_) : x(x_), y(y_) {}
+
+            constexpr static Vector2<T> fromDirection(float length, float dir)
+            {
+                return Vector2<T>(length * cos(dir * M_PI / 180),
+                        length * sin(dir * M_PI / 180));
+            }
 
         public:
             constexpr double abs() const
@@ -23,14 +29,45 @@ namespace geometry
                 return sqrt(x * x + y * y);
             }
 
+            // Magnitude without sqrt
+            constexpr double abs_sqr() const
+            {
+                return x * x + y * y;
+            }
+
             void normalize()
             {
                 *this /= abs();
             }
 
+            Vector2<T> normalized()
+            {
+                return *this / abs();
+            }
+
             constexpr T scalar(const Vector2<T>& vec) const
             {
                 return x * vec.x + y * vec.y;
+            }
+
+            // Returns the magnitude of the resulting 3D vector of a
+            // 3D cross product with z = 0.
+            constexpr T cross(const Vector2<T>& vec) const
+            {
+                return vec.y * x - vec.x * y;
+            }
+
+            // Produces less rounding errors when checking the cross product for 0
+            constexpr inline bool crossAlmostZero(const Vector2<T>& vec) const
+            {
+                return math::almostEquals(vec.y * x, vec.x * y);
+            }
+
+
+            // Returns a vector with the elements' signs.
+            constexpr Vector2<T> signs() const
+            {
+                return Vector2<T>(math::sign(x), math::sign(y));
             }
 
             constexpr double dir() const
@@ -52,6 +89,16 @@ namespace geometry
                 x = y = val;
             }
 
+            // Useful for floating point number comparison
+            bool almostEquals(const Vector2<T>& p) const
+            {
+                return math::almostEquals(x, p.x) && math::almostEquals(y, p.y);
+            }
+
+            bool almostEquals(const Vector2<T>& p, T tolerance) const
+            {
+                return math::almostEquals(x, p.x, tolerance) && math::almostEquals(y, p.y, tolerance);
+            }
 
             template <class T2>
             constexpr Vector2<T> operator+(const Vector2<T2>& p) const
@@ -182,12 +229,6 @@ namespace geometry
             T x, y;
 
     };
-
-    template <class T>
-    Vector2<T> fromDirection(float length, float dir)
-    {
-        return Vector2<T>(length * cos(dir * M_PI / 180), length * sin(dir * M_PI / 180));
-    }
 }
 
 #endif
