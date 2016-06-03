@@ -100,14 +100,12 @@ namespace geometry
                 return math::almostEquals(x, p.x, tolerance) && math::almostEquals(y, p.y, tolerance);
             }
 
-            template <class T2>
-            constexpr Vector2<T> operator+(const Vector2<T2>& p) const
+            constexpr Vector2<T> operator+(const Vector2<T>& p) const
             {
                 return Vector2<T>(x + p.x, y + p.y);
             }
 
-            template <class T2>
-            Vector2<T>& operator+=(const Vector2<T2>& p)
+            Vector2<T>& operator+=(const Vector2<T>& p)
             {
                 return *this = *this + p;
             }
@@ -118,14 +116,12 @@ namespace geometry
                 return Vector2<T>(-x, -y);
             }
 
-            template <class T2>
-            constexpr Vector2<T> operator-(const Vector2<T2>& p) const
+            constexpr Vector2<T> operator-(const Vector2<T>& p) const
             {
                 return Vector2<T>(x - p.x, y - p.y);
             }
 
-            template <class T2>
-            Vector2<T>& operator-=(const Vector2<T2>& p)
+            Vector2<T>& operator-=(const Vector2<T>& p)
             {
                 return *this = *this - p;
             }
