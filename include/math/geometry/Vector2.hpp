@@ -224,10 +224,23 @@ namespace geometry
                 return Vector2<T2>(static_cast<T2>(x), static_cast<T2>(y));
             }
 
+            constexpr const T& operator[](size_t i) const
+            {
+                return data[i];
+            }
+
+            T& operator[](size_t i)
+            {
+                return data[i];
+            }
 
         public:
-            T x, y;
-
+            union {
+                struct {
+                    T x, y;
+                };
+                T data[2];
+            };
     };
 }
 

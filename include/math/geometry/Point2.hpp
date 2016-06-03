@@ -72,8 +72,23 @@ namespace geometry
                 return Vector2<T>(x - p2.x, y - p2.y);
             }
 
+            constexpr const T& operator[](size_t i) const
+            {
+                return data[i];
+            }
+
+            T& operator[](size_t i)
+            {
+                return data[i];
+            }
+
         public:
-            T x, y;
+            union {
+                struct {
+                    T x, y;
+                };
+                T data[2];
+            };
     };
 }
 
