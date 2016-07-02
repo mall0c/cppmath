@@ -4,7 +4,6 @@
 #include <cstdlib>
 #include <time.h>
 #include <iostream>
-#include <fstream>
 
 using namespace geometry;
 using namespace std;
@@ -13,7 +12,7 @@ template <class T>
 T getRandom();
 
 template <class T, bool ray>
-void printline(ofstream& stream, const char* name, const Line2<T, ray>& line);
+void printline(const char* name, const Line2<T, ray>& line);
 
 template <class T, bool rayA, bool rayB>
 void error(const char* str, const Line2<T, rayA>& a, const Line2<T, rayB>& b);
@@ -58,24 +57,17 @@ int main(int argc, char *argv[])
 template <class T, bool rayA, bool rayB>
 void error(const char* str, const Line2<T, rayA>& a, const Line2<T, rayB>& b)
 {
-    ofstream f("parallel_identical.log", ios_base::app);
     cerr<<"-----------------------------------\nError: "<<str<<endl;
-    f<<"-----------------------------------\nError: "<<str<<endl;
-    printline(f, "a", a);
-    printline(f, "b", b);
+    printline("a", a);
+    printline("b", b);
     cerr<<"a.d x b.d: "<<a.d.cross(b.d)<<endl;
-    f<<"a.d x b.d: "<<a.d.cross(b.d)<<endl;
-    cout<<"tolerance: "<<math::TypeTraits<T>::epsilon()<<endl;
-    f<<"tolerance: "<<math::TypeTraits<T>::epsilon()<<endl;
-    cout<<"equals zero: "<<math::almostEquals(a.d.cross(b.d), (T)0)<<endl;
-    f<<"equals zero: "<<math::almostEquals(a.d.cross(b.d), (T)0)<<endl;
-    f.close();
+    cerr<<"tolerance: "<<math::TypeTraits<T>::epsilon()<<endl;
+    cerr<<"equals zero: "<<math::almostEquals(a.d.cross(b.d), (T)0)<<endl;
 }
 
 template <class T, bool ray>
-void printline(ofstream& stream, const char* name, const Line2<T, ray>& line)
+void printline(const char* name, const Line2<T, ray>& line)
 {
-    stream<<name<<(ray ? "(ray)" : "")<<": ("<<line.p.x<<"; "<<line.p.y<<") + u*("<<line.d.x<<"; "<<line.d.y<<")\n";
     cerr<<name<<(ray ? "(ray)" : "")<<": ("<<line.p.x<<"; "<<line.p.y<<") + u*("<<line.d.x<<"; "<<line.d.y<<")\n";
 }
 
