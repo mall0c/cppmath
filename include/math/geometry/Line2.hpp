@@ -72,6 +72,9 @@ namespace geometry
             Point2<T> p; // start point
             Vector2<T> d; // direction (not normalized)
     };
+
+    typedef Line2<float> Line2f;
+    typedef Line2<int> Line2i;
 }
 
 #endif

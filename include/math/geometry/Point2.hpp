@@ -85,6 +85,9 @@ namespace geometry
                 T data[2];
             };
     };
+
+    typedef Point2<float> Point2f;
+    typedef Point2<int> Point2i;
 }
 
 #endif

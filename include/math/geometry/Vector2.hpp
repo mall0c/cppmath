@@ -238,6 +238,9 @@ namespace geometry
                 T data[2];
             };
     };
+
+    typedef Vector2<float> Vector2f;
+    typedef Vector2<int> Vector2i;
 }
 
 #endif

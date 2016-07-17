@@ -95,6 +95,9 @@ namespace geometry
             Vector2<T> pos;
             Vector2<T> size;
     };
+
+    typedef AABB<float> AABBf;
+    typedef AABB<int> AABBi;
 }
 #endif
 
