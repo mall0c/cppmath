@@ -2,10 +2,7 @@
 #define CPPMATH_AABB_HPP
 
 #include "Vector2.hpp"
-
-#if (defined(__GNUC__) && __cplusplus < 201103) || (defined(_WIN32) && _MSC_VER<1900)
-#define constexpr
-#endif
+#include "../compat.hpp"
 
 namespace geometry
 {

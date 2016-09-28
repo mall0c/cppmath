@@ -1,6 +1,8 @@
 #ifndef CPPMATH_INTERSECTION_HPP
 #define CPPMATH_INTERSECTION_HPP
 
+#include "../compat.hpp"
+
 namespace geometry
 {
     template <class T>

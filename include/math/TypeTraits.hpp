@@ -3,10 +3,7 @@
 
 #include <type_traits>
 #include <cmath>
-
-#if (defined(__GNUC__) && __cplusplus < 201103) || (defined(_WIN32) && _MSC_VER<1900)
-#define constexpr
-#endif
+#include "compat.hpp"
 
 #ifndef CPPMATH_FLOAT_TOLERANCE
 #define CPPMATH_FLOAT_TOLERANCE 1.0e-4f
