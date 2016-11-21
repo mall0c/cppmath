@@ -80,7 +80,7 @@ bool testIntersect()
     for (int j = 0; j < 10; ++j)
     {
         a.p.set(getRandom<T>(), getRandom<T>());
-        a.d.set(getRandom<T>(), getRandom<T>());
+        a.d.fill(getRandom<T>(), getRandom<T>());
 
         for (int i = 0; i < 100; ++i)
         {

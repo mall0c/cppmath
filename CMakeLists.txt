@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 project(cppmath)
 
-set(CXX_STANDARD_REQUIRED OFF)
+set(CXX_STANDARD_REQUIRED ON)
 
 option(BUILD_GRAPHICAL_TEST "Compile the graphical SFML testing program" OFF)
 option(BUILD_TESTS "Build tests" OFF)
