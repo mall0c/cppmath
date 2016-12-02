@@ -25,8 +25,8 @@ namespace geometry
             template <typename... Args>
             Vector(const Args&... args);
 
-            // Specific to 2D.
             // Creates a vector of a given length in a given direction.
+            // Specific to 2D vectors.
             // TODO: Write this for 3D
             template <size_t M = N, typename = typename std::enable_if<M == 2>::type>
             static type fromDirection(float length, float dir);
@@ -61,9 +61,8 @@ namespace geometry
             bool almostEquals(const type& rhs) const;
             bool almostEquals(const type& rhs, T tolerance) const;
 
-        public:
-            // For >=3D vectors.
-            template <size_t M = N, typename = typename std::enable_if<M >= 3>::type>
+            // Specific to 3D and 7D vectors.
+            template <size_t M = N, typename = typename std::enable_if<M == 3 || M == 7>::type>
             type cross(const type& rhs) const;
 
             // Returns the magnitude of the 3D cross product with z = 0.
@@ -76,8 +75,8 @@ namespace geometry
             template <size_t M = N, typename = typename std::enable_if<M == 2>::type>
             bool crossAlmostZero(const type& rhs) const;
 
-            // Specific to 2D.
             // Returns the direction the vector points in.
+            // Specific to 2D vectors.
             template <size_t M = N, typename = typename std::enable_if<M == 2>::type>
             double dir() const;
 

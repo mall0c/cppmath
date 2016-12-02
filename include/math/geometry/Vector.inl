@@ -310,7 +310,6 @@ namespace geometry
     template <class T, size_t N>
     Vector<T, N>::operator bool() const
     {
-        // TODO: make an almost-zero version of this for float vectors?
         _FOREACH_VECTOR(i,
             if (_data[i])
                 return true;
