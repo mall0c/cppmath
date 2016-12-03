@@ -1,4 +1,4 @@
-set(CXX_STANDARD_REQUIRED OFF)
+set(CXX_STANDARD_REQUIRED ON)
 
 macro(gen_test TESTNAME SOURCE)
     add_executable(${TESTNAME} ${SOURCE})

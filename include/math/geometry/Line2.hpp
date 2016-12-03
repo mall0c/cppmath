@@ -13,9 +13,6 @@ namespace geometry
     class Line2
     {
         public:
-            typedef Intersection<Point2<T> > Line2Intersection;
-
-        public:
             Line2() {};
             Line2(const Point2<T>& p_, const Vec2<T>& d_);
             Line2(const Point2<T>& p1, const Point2<T>& p2);
@@ -28,7 +25,7 @@ namespace geometry
             auto isParallel(const Line2<T, isray_other>& line) const -> bool;
 
             template <bool isray_other>
-            auto intersect(const Line2<T, isray_other>& line) const -> Line2Intersection;
+            auto intersect(const Line2<T, isray_other>& line) const -> Intersection<T>;
 
             auto intersect(const Point2<T>& p2) const -> bool;
 
@@ -42,6 +39,8 @@ namespace geometry
 
     typedef Line2<float> Line2f;
     typedef Line2<int> Line2i;
+    typedef Line2<float, true> Ray2f;
+    typedef Line2<int, true> Ray2i;
 }
 
 #include "Line2.inl"

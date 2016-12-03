@@ -1,8 +1,8 @@
 #ifndef CPPMATH_AABB_HPP
 #define CPPMATH_AABB_HPP
 
-#include "Vector2.hpp"
-#include "../compat.hpp"
+#include "Vector.hpp"
+#include "Intersection.hpp"
 
 namespace geometry
 {
@@ -10,91 +10,34 @@ namespace geometry
     class AABB
     {
         public:
-            constexpr AABB()
-            {};
-
-            constexpr AABB(T x, T y, T w, T h) :
-                    pos(x, y),
-                    size(w, h)
-            {};
-
-            constexpr AABB(const Vector2<T>& pos_, const Vector2<T>& size_) :
-                    pos(pos_),
-                    size(size_)
-            {};
-
+            AABB();
+            AABB(T x, T y, T w, T h);
+            AABB(const Vec2<T>& pos_, const Vec2<T>& size_);
 
         public:
-            void move(const Vector2<T>& pos)
-            {
-                this->pos += pos;
-            }
+            // TODO: This functions was useful at some point but probably not
+            // anymore. Consider removing it.
+            void crop(const AABB<T>& rect);
 
-            void crop(const AABB<T>& rect)
-            {
-                if (intersects(rect))
-                {
-                    size += pos; //convert to "range"-rect
+            bool contains(const Vec2<T>& point) const;
+            bool contains(const AABB<T>& rect) const;
+            Intersection<T> intersect(const AABB<T>& rect) const;
 
-                    size.x = std::min(size.x, rect.pos.x + rect.size.x);
-                    size.y = std::min(size.y, rect.pos.y + rect.size.y);
-
-                    pos.x = std::max(pos.x, rect.pos.x);
-                    pos.y = std::max(pos.y, rect.pos.y);
-
-                    size -= pos;
-                }
-                else
-                {
-                    pos = size = Vector2<T>(); //null rect
-                }
-            };
-
-
-            constexpr bool contains(const Vector2<T>& point) const
-            {
-                return point >= pos && point < pos + size;
-            }
-
-            constexpr bool contains(const AABB<T>& rect) const
-            {
-                return contains(rect.pos) && contains(rect.pos + rect.size);
-            }
-
-            constexpr bool intersects(const AABB<T>& rect) const
-            {
-                return  pos.x <= rect.pos.x + rect.size.x &&
-                        pos.x + size.x >= rect.pos.x &&
-                        pos.y <= rect.pos.y + rect.size.y &&
-                        pos.y + size.y >= rect.pos.y;
-            }
-
-
-            constexpr bool operator!=(const AABB<T>& r) const
-            {
-                return pos != r.pos || size != r.size;
-            }
-
-            constexpr bool operator==(const AABB<T>& r) const
-            {
-                return pos == r.pos && size == r.size;
-            }
-
+            bool operator!=(const AABB<T>& r) const;
+            bool operator==(const AABB<T>& r) const;
 
             template <class T2>
-            constexpr operator AABB<T2>() const
-            {
-                return AABB<T2>(static_cast<Vector2<T2>>(pos), static_cast<Vector2<T2>>(size));
-            }
-
+            operator AABB<T2>() const;
 
         public:
-            Vector2<T> pos;
-            Vector2<T> size;
+            Vec2<T> pos;
+            Vec2<T> size;
     };
 
     typedef AABB<float> AABBf;
     typedef AABB<int> AABBi;
 }
-#endif
 
+#include "AABB.inl"
+
+#endif

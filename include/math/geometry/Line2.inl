@@ -31,10 +31,10 @@ namespace geometry
 
     template <class T, bool isray>
     template <bool isray_other>
-    typename Line2<T, isray>::Line2Intersection Line2<T, isray>::intersect(const Line2<T, isray_other>& line) const
+    Intersection<T> Line2<T, isray>::intersect(const Line2<T, isray_other>& line) const
     {
         if (d.crossAlmostZero(line.d)) // parallel or identical
-            return Line2Intersection();
+            return Intersection<T>();
 
         const T dx = line.p.x - p.x,
                 dy = line.p.y - p.y;
@@ -42,9 +42,9 @@ namespace geometry
                      u = (line.d.x * dy - line.d.y * dx) / m;
 
         if ((!isray || u >= 0) && (!isray_other || (d.x * dy - d.y * dx) / m >= 0))
-            return Line2Intersection(p + d * u);
+            return Intersection<T>(p + d * u);
 
-        return Line2Intersection();
+        return Intersection<T>();
     }
 
     template <class T, bool isray>

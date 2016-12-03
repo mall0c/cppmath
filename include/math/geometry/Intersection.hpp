@@ -1,7 +1,8 @@
 #ifndef CPPMATH_INTERSECTION_HPP
 #define CPPMATH_INTERSECTION_HPP
 
-#include "../compat.hpp"
+#include "Vector.hpp"
+#include "Point2.hpp"
 
 namespace geometry
 {
@@ -9,43 +10,31 @@ namespace geometry
     class Intersection
     {
         public:
-            constexpr Intersection() : _valid(false) {}
-            constexpr Intersection(const T& d) : _valid(true), data(d) {}
-
-        public:
-            // Prevents "constructing" data
-            union {
-                T data;
+            enum Type
+            {
+                None,
+                LinexLine,
+                LinexAABB,
+                AABBxAABB
             };
 
-        private:
-            bool _valid;
+        public:
+            Intersection() : type(None) {}
+            Intersection(Type type_) : type(type_) {}
+            Intersection(const Vec2<T>& d) : type(AABBxAABB), delta(d) {}
+            Intersection(const Point2<T>& p_) : type(LinexLine), p(p_) {}
+
+            operator bool() const
+            {
+                return type != None;
+            }
 
         public:
-            constexpr operator bool() const
-            {
-                return _valid;
-            }
-
-            constexpr const T& operator*() const
-            {
-                return data;
-            }
-
-            T& operator*()
-            {
-                return data;
-            }
-
-            constexpr const T* operator->() const
-            {
-                return &data;
-            }
-
-            T* operator->()
-            {
-                return &data;
-            }
+            Type type;
+            union {
+                Vec2<T> delta;
+                Point2<T> p;
+            };
     };
 }
 
