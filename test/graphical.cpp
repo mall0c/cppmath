@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
 
             if (i != 0)
             {
-                Linef::Point2Intersection isec;
+                Linef::Line2Intersection isec;
                 if (l.isray)
                     isec = line.intersect(l.r);
                 else
