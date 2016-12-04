@@ -96,12 +96,12 @@ bool testIntersect()
             }
             else if (rayA && rayB && u.signs() != a.d.signs() && -u.signs() != b.d.signs())
             {
-                if (a.isIdentical(b))
-                {
-                    error("Rays are identical but shouldn't be.", a, b);
-                    return false;
-                }
-                else if (!a.isParallel(b))
+                // if (a.isIdentical(b))
+                // {
+                //     error("Rays are identical but shouldn't be.", a, b);
+                //     return false;
+                // }
+                if (!a.isParallel(b))
                 {
                     error("Rays should be parallel but aren't.", a, b);
                     return false;
@@ -112,11 +112,11 @@ bool testIntersect()
                 error("Lines should not be parallel.", a, b);
                 return false;
             }
-            else if (!a.isIdentical(b))
-            {
-                error("Lines should be identical but aren't.", a, b);
-                return false;
-            }
+            // if (!a.isIdentical(b))
+            // {
+            //     error("Lines should be identical but aren't.", a, b);
+            //     return false;
+            // }
         }
     }
     return true;

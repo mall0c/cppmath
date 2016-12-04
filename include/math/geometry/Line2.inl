@@ -15,12 +15,13 @@ namespace geometry
         p(p1), d(p2 - p1)
     {};
 
-    template <class T, bool isray>
-    template <bool isray_other>
-    bool Line2<T, isray>::isIdentical(const Line2<T, isray_other>& line) const
-    {
-        return d.crossAlmostZero(line.d) && (intersect(line.p) || line.intersect(p));
-    }
+    // TODO: Fix this.
+    // template <class T, bool isray>
+    // template <bool isray_other>
+    // bool Line2<T, isray>::isIdentical(const Line2<T, isray_other>& line) const
+    // {
+    //     return d.crossAlmostZero(line.d) && (intersect(line.p) || line.intersect(p));
+    // }
 
     template <class T, bool isray>
     template <bool isray_other>

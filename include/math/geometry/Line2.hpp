@@ -18,8 +18,9 @@ namespace geometry
             Line2(const Point2<T>& p1, const Point2<T>& p2);
 
         public:
-            template <bool isray_other>
-            auto isIdentical(const Line2<T, isray_other>& line) const -> bool;
+            // TODO: Fix this. Until then, leave it disabled.
+            // template <bool isray_other>
+            // auto isIdentical(const Line2<T, isray_other>& line) const -> bool;
 
             template <bool isray_other>
             auto isParallel(const Line2<T, isray_other>& line) const -> bool;
