@@ -3,7 +3,7 @@
 
 #include "VectorData.hpp"
 #include "../math.hpp"
-#include <type_traits>
+#include "../TypeTraits.hpp"
 
 // TODO: Create global functions for dot, signs, abs, ...
 
@@ -14,6 +14,12 @@ namespace geometry
     {
         public:
             typedef Vector<T, N> type;
+
+            template <typename T2>
+            using other_type = Vector<T2, N>;
+
+            template <typename T2>
+            using ResVec = Vector<math::OpResult<T, T2>, N>;
 
             // Saves writing VectorData<T, N>::_data or this->_data everytime
             using VectorData<T, N>::_data;
@@ -81,33 +87,40 @@ namespace geometry
             double dir() const;
 
         public:
-            type operator+(const type& p) const;
-            type& operator+=(const type& p);
+            template <typename T2>
+            ResVec<T2> operator+(const other_type<T2>& p) const;
+
+            template <typename T2>
+            type& operator+=(const other_type<T2>& p);
 
             type operator-() const;
-            type operator-(const type& p) const;
-            type& operator-=(const type& p);
 
             template <typename T2>
-            type operator*(const Vector<T2, N>& p) const;
+            ResVec<T2> operator-(const other_type<T2>& p) const;
 
             template <typename T2>
-            type operator*(const T2& val) const;
+            type& operator-=(const other_type<T2>& p);
 
             template <typename T2>
-            type& operator*=(const Vector<T2, N>& p);
+            ResVec<T2> operator*(const other_type<T2>& p) const;
+
+            template <typename T2>
+            ResVec<T2> operator*(const T2& val) const;
+
+            template <typename T2>
+            type& operator*=(const other_type<T2>& p);
 
             template <typename T2>
             type& operator*=(const T2& val);
 
             template <typename T2>
-            type operator/(const Vector<T2, N>& p) const;
+            ResVec<T2> operator/(const other_type<T2>& p) const;
 
             template <typename T2>
-            type operator/(const T2& val) const;
+            ResVec<T2> operator/(const T2& val) const;
 
             template <typename T2>
-            type& operator/=(const Vector<T2, N>& p);
+            type& operator/=(const other_type<T2>& p);
 
             template <typename T2>
             type& operator/=(const T2& val);
@@ -123,7 +136,7 @@ namespace geometry
             operator bool() const;
 
             template <typename T2>
-            operator Vector<T2, N>() const;
+            explicit operator other_type<T2>() const;
 
             const T& operator[](size_t i) const;
             T& operator[](size_t i);

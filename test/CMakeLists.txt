@@ -15,4 +15,5 @@ endif()
 
 if(BUILD_TESTS)
     gen_test(parallel_identical parallel_identical.cpp)
+    gen_test(vector_optypes vector_optypes.cpp)
 endif()

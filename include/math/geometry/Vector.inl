@@ -157,15 +157,17 @@ namespace geometry
 
 
     template <class T, size_t N>
-    Vector<T, N> Vector<T, N>::operator+(const type& p) const
+    template <class T2>
+    Vector<T, N>::ResVec<T2> Vector<T, N>::operator+(const other_type<T2>& p) const
     {
-        type vec(*this);
+        ResVec<T2> vec(*this);
         vec += p;
         return vec;
     }
 
     template <class T, size_t N>
-    Vector<T, N>& Vector<T, N>::operator+=(const type& p)
+    template <class T2>
+    Vector<T, N>& Vector<T, N>::operator+=(const other_type<T2>& p)
     {
         _FOREACH_VECTOR(i, _data[i] += p[i];)
     }
@@ -179,32 +181,34 @@ namespace geometry
     }
 
     template <class T, size_t N>
-    Vector<T, N> Vector<T, N>::operator-(const type& p) const
+    template <class T2>
+    Vector<T, N>::ResVec<T2> Vector<T, N>::operator-(const other_type<T2>& p) const
     {
-        type vec(*this);
+        ResVec<T2> vec(*this);
         _FOREACH_VECTOR(i, vec[i] - p[i];)
     }
 
     template <class T, size_t N>
-    Vector<T, N>& Vector<T, N>::operator-=(const type& p)
+    template <class T2>
+    Vector<T, N>& Vector<T, N>::operator-=(const other_type<T2>& p)
     {
         _FOREACH_VECTOR(i, _data[i] -= p[i];)
     }
 
     template <class T, size_t N>
     template <class T2>
-    Vector<T, N> Vector<T, N>::operator*(const Vector<T2, N>& p) const
+    Vector<T, N>::ResVec<T2> Vector<T, N>::operator*(const other_type<T2>& p) const
     {
-        type vec(*this);
+        ResVec<T2> vec(*this);
         _FOREACH_VECTOR(i, vec[i] *= p[i];)
         return vec;
     }
 
     template <class T, size_t N>
     template <class T2>
-    Vector<T, N> Vector<T, N>::operator*(const T2& val) const
+    Vector<T, N>::ResVec<T2> Vector<T, N>::operator*(const T2& val) const
     {
-        type vec(*this);
+        ResVec<T2> vec(*this);
         _FOREACH_VECTOR(i, vec[i] *= val;)
         return vec;
     }
@@ -227,18 +231,18 @@ namespace geometry
 
     template <class T, size_t N>
     template <class T2>
-    Vector<T, N> Vector<T, N>::operator/(const Vector<T2, N>& p) const
+    Vector<T, N>::ResVec<T2> Vector<T, N>::operator/(const other_type<T2>& p) const
     {
-        type vec(*this);
+        ResVec<T2> vec(*this);
         _FOREACH_VECTOR(i, vec[i] /= p[i];)
         return vec;
     }
 
     template <class T, size_t N>
     template <class T2>
-    Vector<T, N> Vector<T, N>::operator/(const T2& val) const
+    Vector<T, N>::ResVec<T2> Vector<T, N>::operator/(const T2& val) const
     {
-        type vec(*this);
+        ResVec<T2> vec(*this);
         _FOREACH_VECTOR(i, vec[i] /= val;)
         return vec;
     }
