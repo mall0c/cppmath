@@ -8,51 +8,58 @@
 
 namespace geometry
 {
-    template <class T, size_t N>
+    template <typename T, size_t N>
     Vector<T, N>::Vector(const T& val)
     {
         fill(val);
     }
 
-    template <class T, size_t N>
-    template <typename... Args>
-    Vector<T, N>::Vector(const Args&... args)
+    template <typename T, size_t N>
+    template <typename T2>
+    Vector<T, N>::Vector(const other_type<T2>& vec)
     {
-        fill(args...);
+        _FOREACH_VECTOR(i, _data[i] = static_cast<T>(vec[i]);)
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
+    template <typename First, typename... Args>
+    Vector<T, N>::Vector(const First& first, const Args&... args)
+    {
+        fill(first, args...);
+    }
+
+    template <typename T, size_t N>
     template <typename F>
     void Vector<T, N>::foreach(F callback)
     {
         _FOREACH_VECTOR(i, callback(_data + i);)
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     double Vector<T, N>::abs() const
     {
         return sqrt(dot(*this));
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     double Vector<T, N>::abs_sqr() const
     {
         return dot(*this);
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     void Vector<T, N>::normalize()
     {
         *this /= abs();
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     Vector<T, N> Vector<T, N>::normalized() const
     {
         return *this / abs();
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     T Vector<T, N>::dot(const type& vec) const
     {
         T tmp = 0;
@@ -60,7 +67,7 @@ namespace geometry
         return tmp;
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     Vector<T, N> Vector<T, N>::signs() const
     {
         type vec;
@@ -68,33 +75,33 @@ namespace geometry
         return vec;
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     void Vector<T, N>::fill(const T& val)
     {
         _FOREACH_VECTOR(i, _data[i] = val;)
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     template <typename... Args>
     void Vector<T, N>::fill(const Args&... args)
     {
         _fill<0>(args...);
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     void Vector<T, N>::set(const T& val)
     {
         fill(val);
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     template <typename... Args>
     void Vector<T, N>::set(const Args&... args)
     {
         fill(args...);
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     bool Vector<T, N>::almostEquals(const type& p) const
     {
         _FOREACH_VECTOR(i,
@@ -104,7 +111,7 @@ namespace geometry
         return true;
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     bool Vector<T, N>::almostEquals(const type& p, T tolerance) const
     {
         _FOREACH_VECTOR(i,
@@ -114,21 +121,21 @@ namespace geometry
     }
 
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     template <size_t M, typename>
     T Vector<T, N>::cross(const type& rhs) const
     {
         return rhs.y * this->x - rhs.x * this->y;
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     template <size_t M, typename>
     bool Vector<T, N>::crossAlmostZero(const type& rhs) const
     {
         return math::almostEquals(rhs.y * this->x, rhs.x * this->y);
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     template <size_t M, typename>
     Vector<T, N> Vector<T, N>::cross(const type& rhs) const
     {
@@ -139,7 +146,7 @@ namespace geometry
         return vec;
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     template <size_t M, typename>
     double Vector<T, N>::dir() const
     {
@@ -148,7 +155,7 @@ namespace geometry
         return acos(this->x / abs()) / M_PI * 180;
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     template <size_t M, typename>
     Vector<T, N> Vector<T, N>::fromDirection(float len, float dir)
     {
@@ -156,8 +163,8 @@ namespace geometry
     }
 
 
-    template <class T, size_t N>
-    template <class T2>
+    template <typename T, size_t N>
+    template <typename T2>
     Vector<T, N>::ResVec<T2> Vector<T, N>::operator+(const other_type<T2>& p) const
     {
         ResVec<T2> vec(*this);
@@ -165,14 +172,14 @@ namespace geometry
         return vec;
     }
 
-    template <class T, size_t N>
-    template <class T2>
+    template <typename T, size_t N>
+    template <typename T2>
     Vector<T, N>& Vector<T, N>::operator+=(const other_type<T2>& p)
     {
         _FOREACH_VECTOR(i, _data[i] += p[i];)
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     Vector<T, N> Vector<T, N>::operator-() const
     {
         type vec(*this);
@@ -180,23 +187,23 @@ namespace geometry
         return vec;
     }
 
-    template <class T, size_t N>
-    template <class T2>
+    template <typename T, size_t N>
+    template <typename T2>
     Vector<T, N>::ResVec<T2> Vector<T, N>::operator-(const other_type<T2>& p) const
     {
         ResVec<T2> vec(*this);
         _FOREACH_VECTOR(i, vec[i] - p[i];)
     }
 
-    template <class T, size_t N>
-    template <class T2>
+    template <typename T, size_t N>
+    template <typename T2>
     Vector<T, N>& Vector<T, N>::operator-=(const other_type<T2>& p)
     {
         _FOREACH_VECTOR(i, _data[i] -= p[i];)
     }
 
-    template <class T, size_t N>
-    template <class T2>
+    template <typename T, size_t N>
+    template <typename T2>
     Vector<T, N>::ResVec<T2> Vector<T, N>::operator*(const other_type<T2>& p) const
     {
         ResVec<T2> vec(*this);
@@ -204,8 +211,8 @@ namespace geometry
         return vec;
     }
 
-    template <class T, size_t N>
-    template <class T2>
+    template <typename T, size_t N>
+    template <typename T2>
     Vector<T, N>::ResVec<T2> Vector<T, N>::operator*(const T2& val) const
     {
         ResVec<T2> vec(*this);
@@ -213,24 +220,24 @@ namespace geometry
         return vec;
     }
 
-    template <class T, size_t N>
-    template <class T2>
+    template <typename T, size_t N>
+    template <typename T2>
     Vector<T, N>& Vector<T, N>::operator*=(const Vector<T2, N>& p)
     {
         _FOREACH_VECTOR(i, _data[i] *= p[i];)
         return *this;
     }
 
-    template <class T, size_t N>
-    template <class T2>
+    template <typename T, size_t N>
+    template <typename T2>
     Vector<T, N>& Vector<T, N>::operator*=(const T2& val)
     {
         _FOREACH_VECTOR(i, _data[i] *= val;)
         return *this;
     }
 
-    template <class T, size_t N>
-    template <class T2>
+    template <typename T, size_t N>
+    template <typename T2>
     Vector<T, N>::ResVec<T2> Vector<T, N>::operator/(const other_type<T2>& p) const
     {
         ResVec<T2> vec(*this);
@@ -238,8 +245,8 @@ namespace geometry
         return vec;
     }
 
-    template <class T, size_t N>
-    template <class T2>
+    template <typename T, size_t N>
+    template <typename T2>
     Vector<T, N>::ResVec<T2> Vector<T, N>::operator/(const T2& val) const
     {
         ResVec<T2> vec(*this);
@@ -247,23 +254,23 @@ namespace geometry
         return vec;
     }
 
-    template <class T, size_t N>
-    template <class T2>
+    template <typename T, size_t N>
+    template <typename T2>
     Vector<T, N>& Vector<T, N>::operator/=(const Vector<T2, N>& p)
     {
         _FOREACH_VECTOR(i, _data[i] /= p[i];)
         return *this;
     }
 
-    template <class T, size_t N>
-    template <class T2>
+    template <typename T, size_t N>
+    template <typename T2>
     Vector<T, N>& Vector<T, N>::operator/=(const T2& val)
     {
         _FOREACH_VECTOR(i, _data[i] /= val;)
         return *this;
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     bool Vector<T, N>::operator<(const type& p) const
     {
         _FOREACH_VECTOR(i,
@@ -273,7 +280,7 @@ namespace geometry
         return true;
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     bool Vector<T, N>::operator>(const type& p) const
     {
         _FOREACH_VECTOR(i,
@@ -283,19 +290,19 @@ namespace geometry
         return true;
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     bool Vector<T, N>::operator<=(const type& p) const
     {
         return !(*this > p);
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     bool Vector<T, N>::operator>=(const type& p) const
     {
         return !(*this < p);
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     bool Vector<T, N>::operator!=(const type& p) const
     {
         _FOREACH_VECTOR(i,
@@ -305,24 +312,25 @@ namespace geometry
         return false;
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     bool Vector<T, N>::operator==(const type& p) const
     {
         return !(*this != p);
     }
 
-    template <class T, size_t N>
-    Vector<T, N>::operator bool() const
-    {
-        _FOREACH_VECTOR(i,
-            if (_data[i])
-                return true;
-        )
-        return false;
-    }
+    // template <typename T, size_t N>
+    // Vector<T, N>::operator bool() const
+    // {
+    //     assert(false);
+    //     _FOREACH_VECTOR(i,
+    //         if (_data[i])
+    //             return true;
+    //     )
+    //     return false;
+    // }
 
-    template <class T, size_t N>
-    template <class T2>
+    template <typename T, size_t N>
+    template <typename T2>
     Vector<T, N>::operator Vector<T2, N>() const
     {
         Vector<T2, N> vec;
@@ -330,19 +338,19 @@ namespace geometry
         return vec;
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     const T& Vector<T, N>::operator[](size_t i) const
     {
         return VectorData<T, N>::_data[i];
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     T& Vector<T, N>::operator[](size_t i)
     {
         return _data[i];
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     template <size_t i, typename U, typename... Args>
     void Vector<T, N>::_fill(const U& val, const Args&... rest)
     {
@@ -350,7 +358,7 @@ namespace geometry
         _fill<i + 1>(rest...);
     }
 
-    template <class T, size_t N>
+    template <typename T, size_t N>
     template <size_t i, typename U>
     void Vector<T, N>::_fill(const U& val)
     {

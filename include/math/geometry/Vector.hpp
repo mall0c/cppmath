@@ -26,10 +26,13 @@ namespace geometry
 
         public:
             Vector() : Vector(0) {}
-            Vector(const T& val);
+            explicit Vector(const T& val);
 
-            template <typename... Args>
-            Vector(const Args&... args);
+            template <typename T2>
+            explicit Vector(const other_type<T2>& vec);
+
+            template <typename First, typename... Args>
+            explicit Vector(const First& first, const Args&... args);
 
             // Creates a vector of a given length in a given direction.
             // Specific to 2D vectors.
@@ -133,10 +136,10 @@ namespace geometry
             bool operator!=(const type& p) const;
             bool operator==(const type& p) const;
 
-            operator bool() const;
+            // operator bool() const;
 
             template <typename T2>
-            explicit operator other_type<T2>() const;
+            operator other_type<T2>() const;
 
             const T& operator[](size_t i) const;
             T& operator[](size_t i);
@@ -151,6 +154,8 @@ namespace geometry
 
     typedef Vector<float, 2> Vec2f;
     typedef Vector<float, 3> Vec3f;
+    typedef Vector<double, 2> Vec2d;
+    typedef Vector<double, 3> Vec3d;
     typedef Vector<int, 2> Vec2i;
     typedef Vector<int, 3> Vec3i;
 
