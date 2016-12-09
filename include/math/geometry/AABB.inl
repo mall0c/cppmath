@@ -58,6 +58,7 @@ namespace geometry
     template <class T>
     Intersection<T> AABB<T>::intersect(const AABB<T>& other) const
     {
+        // Adapted from http://noonat.github.io/intersect/#aabb-vs-aabb
         T dx = (other.pos.x + other.size.x / 2) - (pos.x + size.x / 2);
         T px = (other.size.x / 2 + size.x / 2) - abs(dx);
         if (px <= 0)
@@ -68,7 +69,8 @@ namespace geometry
         if (py <= 0)
             return Intersection<T>();
 
-        return Intersection<T>(Vec2<T>(px * math::sign(dx), py * math::sign(dy)));
+        return Intersection<T>(Vec2<T>(
+                    px * (dx < 0 ? -1 : 1), py * (dy < 0 ? -1 : 1)));
     };
 
 
