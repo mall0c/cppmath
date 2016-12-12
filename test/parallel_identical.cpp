@@ -61,7 +61,7 @@ void error(const char* str, const Line2<T, rayA>& a, const Line2<T, rayB>& b)
     printline("a", a);
     printline("b", b);
     cerr<<"a.d x b.d: "<<a.d.cross(b.d)<<endl;
-    cerr<<"tolerance: "<<math::TypeTraits<T>::epsilon()<<endl;
+    cerr<<"tolerance: "<<math::epsilon<T>()<<endl;
     cerr<<"equals zero: "<<math::almostEquals(a.d.cross(b.d), (T)0)<<endl;
 }
 
@@ -85,7 +85,7 @@ bool testIntersect()
         for (int i = 0; i < 100; ++i)
         {
             // randomize b's position and direction vector but keep it on a
-            Vector2<T> u = a.d * getRandom<T>();
+            Vec2<T> u = a.d * getRandom<T>();
             b.p = a.p + u;
             b.d = a.d * getRandom<T>();
 

@@ -23,31 +23,31 @@ namespace math
     template <typename T, typename T2>
     using OpResult = decltype(std::declval<T>() + std::declval<T2>());
 
-    template <class T>
-    struct TypeTraits
+
+    // Tolerance values for (floating point) comparison
+    template <typename T>
+    constexpr T epsilon()
     {
-        constexpr static T epsilon()
-        {
-            return std::is_integral<T>::value ? 0 : T();
-        }
-    };
+        return std::is_integral<T>::value ? 0 : T();
+    }
 
     template <>
-    constexpr float TypeTraits<float>::epsilon()
+    constexpr float epsilon()
     {
         return CPPMATH_FLOAT_TOLERANCE;
     }
 
     template <>
-    constexpr double TypeTraits<double>::epsilon()
+    constexpr double epsilon()
     {
         return CPPMATH_DOUBLE_TOLERANCE;
     }
 
 
     // Adapted from http://floating-point-gui.de/errors/comparison/
-    template<class T>
-    bool almostEquals(const T& a, const T& b, T tolerance = TypeTraits<T>::epsilon())
+    // template<typename T, typename U>
+    template<typename T>
+    bool almostEquals(const T& a, const T& b, T tolerance = epsilon<T>())
     {
         // Shortcut for binary equality (also infinites)
         if (a == b)
