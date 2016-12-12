@@ -177,6 +177,7 @@ namespace geometry
     Vector<T, N>& Vector<T, N>::operator+=(const other_type<T2>& p)
     {
         _FOREACH_VECTOR(i, _data[i] += p[i];)
+        return *this;
     }
 
     template <typename T, size_t N>
@@ -192,7 +193,8 @@ namespace geometry
     Vector<T, N>::ResVec<T2> Vector<T, N>::operator-(const other_type<T2>& p) const
     {
         ResVec<T2> vec(*this);
-        _FOREACH_VECTOR(i, vec[i] - p[i];)
+        _FOREACH_VECTOR(i, vec[i] -= p[i];)
+        return vec;
     }
 
     template <typename T, size_t N>
@@ -200,6 +202,7 @@ namespace geometry
     Vector<T, N>& Vector<T, N>::operator-=(const other_type<T2>& p)
     {
         _FOREACH_VECTOR(i, _data[i] -= p[i];)
+        return *this;
     }
 
     template <typename T, size_t N>
