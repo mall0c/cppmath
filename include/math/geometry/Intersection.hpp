@@ -3,26 +3,28 @@
 
 #include "Vector.hpp"
 #include "Point2.hpp"
+#include "Line2.hpp"
 
 namespace geometry
 {
+    enum IntersectionType
+    {
+        None,
+        LinexLine,
+        LinexAABB,
+        AABBxAABB
+    };
+
     template <class T>
     class Intersection
     {
         public:
-            enum Type
-            {
-                None,
-                LinexLine,
-                LinexAABB,
-                AABBxAABB
-            };
-
-        public:
             Intersection() : type(None) {}
-            Intersection(Type type_) : type(type_) {}
+            Intersection(IntersectionType type_) : type(type_) {}
             Intersection(const Vec2<T>& d) : type(AABBxAABB), delta(d) {}
             Intersection(const Point2<T>& p_) : type(LinexLine), p(p_) {}
+            Intersection(const Point2<T>& p_, const Vec2<T>& d_) :
+                type(LinexAABB), seg(p_, d_) {}
 
             operator bool() const
             {
@@ -30,10 +32,15 @@ namespace geometry
             }
 
         public:
-            Type type;
+            IntersectionType type;
             union {
-                Vec2<T> delta;
-                Point2<T> p;
+                // Put these in a struct so they have the same memory layout
+                // as Line2, which might come in handy some day.
+                struct {
+                    Point2<T> p;
+                    Vec2<T> delta;
+                };
+                Line2<T, true> seg;
             };
     };
 }

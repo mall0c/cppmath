@@ -13,7 +13,12 @@
 using namespace std;
 using namespace geometry;
 
-typedef Point2<float> Pointf;
+typedef Vec2f VecType;
+typedef AABBf AABBType;
+typedef Point2f PointType;
+typedef Line2f LineType;
+typedef Ray2f RayType;
+typedef Intersection<float> IsecType;
 
 class Shape
 {
@@ -26,17 +31,18 @@ class Shape
         };
 
     public:
-        Shape() {}
+        Shape() : p() {}
         void render(sf::RenderTarget& target) const;
         void renderCollision(sf::RenderTarget& target, const Shape& shape) const;
 
     public:
         Shapes type;
         union {
-            Vec2f pos;
-            Line2f line;
-            Ray2f ray;
-            AABBf aabb;
+            PointType p;
+            VecType pos;
+            LineType line;
+            RayType ray;
+            AABBType aabb;
         };
 };
 
@@ -44,6 +50,9 @@ class Shape
 void create(std::vector<Shape>& vec);
 void setCursor(Shape& cursor, Shape::Shapes type);
 
+void drawRect(sf::RenderTarget& target, const AABBType& aabb, sf::Color col = sf::Color(131, 148, 150));
+void drawLine(sf::RenderTarget& target, const PointType& p1, const PointType& p2, sf::Color col = sf::Color(131, 148, 150));
+void drawPoint(sf::RenderTarget& target, const PointType& p, sf::Color c = sf::Color::Red);
 
 int main(int argc, char *argv[])
 {
@@ -59,14 +68,14 @@ int main(int argc, char *argv[])
     Shape& cursor = shapes[0];
     setCursor(cursor, Shape::Line);
 
-    sf::CircleShape c(3);
-    c.setOrigin(3, 3);
-
     sf::Event ev;
     while (window.isOpen())
     {
         while (window.pollEvent(ev))
         {
+            if (!window.hasFocus())
+                continue;
+
             if (ev.type == sf::Event::KeyPressed)
             {
                 switch (ev.key.code)
@@ -106,29 +115,50 @@ int main(int argc, char *argv[])
                     case sf::Keyboard::Num3:
                         setCursor(cursor, Shape::AABB);
                         break;
+
+                    default:
+                        if (cursor.type != Shape::AABB)
+                        {
+                            switch (ev.key.code)
+                            {
+                                case sf::Keyboard::H:
+                                    cursor.line.d.fill(-2, 0);
+                                    break;
+
+                                case sf::Keyboard::J:
+                                    cursor.line.d.fill(0, 2);
+                                    break;
+
+                                case sf::Keyboard::K:
+                                    cursor.line.d.fill(0, -2);
+                                    break;
+
+                                case sf::Keyboard::L:
+                                    cursor.line.d.fill(2, 0);
+                                    break;
+                            }
+                        }
+                        break;
                 }
+            }
+            else if (ev.type == sf::Event::MouseMoved &&
+                    cursor.type != Shape::AABB)
+            {
+                cursor.line.d.x = ev.mouseMove.x - cursor.line.p.x;
+                cursor.line.d.y = ev.mouseMove.y - cursor.line.p.y;
             }
         }
 
-        if (cursor.type != Shape::AABB)
-        {
-            cursor.line.d.x = sf::Mouse::getPosition(window).x - cursor.line.p.x;
-            cursor.line.d.y = sf::Mouse::getPosition(window).y - cursor.line.p.y;
-        }
+        window.clear(sf::Color(0, 43, 54));
 
-        window.clear();
-
-        for (size_t i = 0; i < shapes.size(); ++i)
+        cursor.render(window);
+        for (size_t i = 1; i < shapes.size(); ++i)
         {
             shapes[i].render(window);
-
-            if (i != 0)
-                cursor.renderCollision(window, shapes[i]);
+            cursor.renderCollision(window, shapes[i]);
         }
 
-        c.setPosition(cursor.pos.x, cursor.pos.y);
-        c.setFillColor(sf::Color::Blue);
-        window.draw(c);
+        drawPoint(window, cursor.p, sf::Color::Blue);
 
         window.display();
     }
@@ -145,19 +175,19 @@ void create(std::vector<Shape>& vec)
         {
             case 0:
                 vec[i].type = Shape::Line;
-                vec[i].line = Line2f(Pointf(rand() % WIDTH, rand() % HEIGHT),
-                        Vec2f::fromDirection(1, rand() % 360));
+                vec[i].line = LineType(PointType(rand() % WIDTH, rand() % HEIGHT),
+                        VecType::fromDirection(10, rand() % 360));
                 break;
 
             case 1:
                 vec[i].type = Shape::Ray;
-                vec[i].ray = Ray2f(Pointf(rand() % WIDTH, rand() % HEIGHT),
-                        Vec2f::fromDirection(1, rand() % 360));
+                vec[i].ray = RayType(PointType(rand() % WIDTH, rand() % HEIGHT),
+                        VecType::fromDirection(10, rand() % 360));
                 break;
 
             case 2:
                 vec[i].type = Shape::AABB;
-                vec[i].aabb = AABBf(rand() % WIDTH, rand() % HEIGHT,
+                vec[i].aabb = AABBType(rand() % WIDTH, rand() % HEIGHT,
                         rand() % 200, rand() % 200);
                 break;
         }
@@ -167,19 +197,21 @@ void create(std::vector<Shape>& vec)
 void setCursor(Shape& cursor, Shape::Shapes type)
 {
     // Positions should be all aligned at the same memory offset
+    PointType old = cursor.p;
+
     cursor.type = type;
     switch (type)
     {
         case Shape::Line:
-            cursor.line = Line2f(Pointf(0, 0), Vec2f(1, 1));
+            cursor.line = LineType(old, VecType(1, 1));
             break;
 
         case Shape::Ray:
-            cursor.ray = Ray2f(Pointf(0, 0), Vec2f(1, 1));
+            cursor.ray = RayType(old, VecType(1, 1));
             break;
 
         case Shape::AABB:
-            cursor.aabb = AABBf(0, 0, 100, 70);
+            cursor.aabb = AABBType(old.x, old.y, 100, 70);
             break;
     }
 }
@@ -187,38 +219,17 @@ void setCursor(Shape& cursor, Shape::Shapes type)
 
 void Shape::render(sf::RenderTarget& target) const
 {
-    if (type == Ray || type == Line)
-    {
-        Pointf start, stop;
-        if (type == Ray)
-            start = ray.p;
-        else
-            start = line.p - line.d * 1000;
-
-        stop = line.p + line.d * 1000;
-
-        sf::Vertex v[] = {
-            sf::Vertex(sf::Vector2f(start.x, start.y)),
-            sf::Vertex(sf::Vector2f(stop.x, stop.y))
-        };
-        target.draw(v, 2, sf::Lines);
-    }
+    if (type == AABB)
+        drawRect(target, aabb);
     else
-    {
-        sf::Vertex v[] = {
-            sf::Vertex(sf::Vector2f(aabb.pos.x, aabb.pos.y)),
-            sf::Vertex(sf::Vector2f(aabb.pos.x + aabb.size.x, aabb.pos.y)),
-            sf::Vertex(sf::Vector2f(aabb.pos.x + aabb.size.x, aabb.pos.y + aabb.size.y)),
-            sf::Vertex(sf::Vector2f(aabb.pos.x, aabb.pos.y + aabb.size.y)),
-            sf::Vertex(sf::Vector2f(aabb.pos.x, aabb.pos.y)),
-        };
-        target.draw(v, 5, sf::LineStrip);
-    }
+        drawLine(target,
+                (type == Ray) ? (ray.p) : (line.p - line.d * 1000),
+                line.p + line.d * 1000);
 }
 
 void Shape::renderCollision(sf::RenderTarget& target, const Shape& shape) const
 {
-    Intersection<float> isec;
+    IsecType isec;
 
     switch (type)
     {
@@ -232,7 +243,7 @@ void Shape::renderCollision(sf::RenderTarget& target, const Shape& shape) const
                     isec = line.intersect(shape.ray);
                     break;
                 case AABB:
-                    // isec = line.intersect(shape.aabb);
+                    isec = line.intersect(shape.aabb);
                     break;
             }
             break;
@@ -247,7 +258,7 @@ void Shape::renderCollision(sf::RenderTarget& target, const Shape& shape) const
                     isec = ray.intersect(shape.ray);
                     break;
                 case AABB:
-                    // isec = ray.intersect(shape.aabb);
+                    isec = ray.intersect(shape.aabb);
                     break;
             }
             break;
@@ -255,12 +266,12 @@ void Shape::renderCollision(sf::RenderTarget& target, const Shape& shape) const
         case AABB:
             switch (shape.type)
             {
-                // case Line:
-                //     isec = aabb.intersect(shape.line);
-                //     break;
-                // case Ray:
-                //     isec = aabb.intersect(shape.ray);
-                //     break;
+                case Line:
+                    isec = shape.line.intersect(aabb);
+                    break;
+                case Ray:
+                    isec = shape.ray.intersect(aabb);
+                    break;
                 case AABB:
                     isec = aabb.intersect(shape.aabb);
                     break;
@@ -270,29 +281,54 @@ void Shape::renderCollision(sf::RenderTarget& target, const Shape& shape) const
 
     if (isec)
     {
-        if (isec.type == Intersection<float>::LinexLine)
+        if (isec.type == LinexLine)
         {
-            sf::CircleShape c(3);
-            c.setOrigin(3, 3);
-            c.setPosition(isec.p.x, isec.p.y);
-            c.setFillColor(sf::Color::Red);
-            target.draw(c);
+            drawPoint(target, isec.p);
         }
-        else if (isec.type == Intersection<float>::AABBxAABB)
+        else if (isec.type == AABBxAABB)
         {
-            // sf::Vertex v[] = {
-            //     sf::Vertex(sf::Vector2f(pos.x, pos.y)),
-            //     sf::Vertex(sf::Vector2f(pos.x - isec.delta.x, pos.y - isec.delta.y))
-            // };
-            // target.draw(v, 2, sf::Lines);
-            sf::RectangleShape c(sf::Vector2f(aabb.size.x, aabb.size.y));
-            c.setPosition(pos.x, pos.y);
+            AABBType rect(aabb);
             if (abs(isec.delta.x) < abs(isec.delta.y))
-                c.move(-isec.delta.x, 0);
+                rect.pos.x -= isec.delta.x;
             else
-                c.move(0, -isec.delta.y);
-            c.setFillColor(sf::Color::Red);
-            target.draw(c);
+                rect.pos.y -= isec.delta.y;
+            drawRect(target, rect, sf::Color::Magenta);
+        }
+        else if (isec.type == LinexAABB)
+        {
+            const PointType& p1 = isec.seg.p;
+            PointType p2 = p1 + isec.seg.d;
+
+            drawPoint(target, p1);
+            drawLine(target, p1, p2, sf::Color::Magenta);
         }
     }
+}
+
+void drawRect(sf::RenderTarget& target, const AABBType& aabb, sf::Color col)
+{
+    sf::RectangleShape c(sf::Vector2f(aabb.size.x, aabb.size.y));
+    c.setPosition(aabb.pos.x, aabb.pos.y);
+    c.setFillColor(sf::Color::Transparent);
+    c.setOutlineColor(col);
+    c.setOutlineThickness(1);
+    target.draw(c);
+}
+
+void drawLine(sf::RenderTarget& target, const PointType& p1, const PointType& p2, sf::Color col)
+{
+    sf::Vertex v[] = {
+        sf::Vertex(sf::Vector2f(p1.x, p1.y), col),
+        sf::Vertex(sf::Vector2f(p2.x, p2.y), col)
+    };
+    target.draw(v, 2, sf::Lines);
+}
+
+void drawPoint(sf::RenderTarget& target, const PointType& p, sf::Color col)
+{
+    sf::CircleShape c(3);
+    c.setOrigin(3, 3);
+    c.setPosition(p.x, p.y);
+    c.setFillColor(col);
+    target.draw(c);
 }
