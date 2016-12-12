@@ -10,6 +10,13 @@ include_directories(include)
 add_library(${PROJECT_NAME} src/math/math.cpp)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
 
+if (CMAKE_COMPILER_IS_GNUCC)
+    add_definitions(-Wall -Wno-switch)
+elseif (MSVC)
+    # Untested
+    add_definitions(/W3)
+endif()
+
 
 if(BUILD_TESTS)
     enable_testing()
