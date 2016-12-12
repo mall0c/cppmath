@@ -1,21 +1,31 @@
 #ifndef CPPMATH_POINT2_HPP
 #define CPPMATH_POINT2_HPP
 
-#include "Vector2.hpp"
+#include "Vector.hpp"
 #include "../compat.hpp"
 
 namespace geometry
 {
-    template <class T>
+    template <typename T>
     class Point2
     {
         public:
             constexpr Point2() : x(0), y(0) {};
             constexpr Point2(const T& x_, const T& y_) : x(x_), y(y_) {};
 
-            constexpr Vector2<T> toVector() const
+            Vec2<T> toVector() const
             {
-                return Vector2<T>(x, y);
+                return Vec2<T>(x, y);
+            }
+
+            const Vec2<T>& asVector() const
+            {
+                return *reinterpret_cast<const Vec2<T>*>(this);
+            }
+
+            Vec2<T>& asVector()
+            {
+                return *reinterpret_cast<Vec2<T>*>(this);
             }
 
             void set(const T& a, const T& b)
@@ -29,39 +39,44 @@ namespace geometry
                 x = y = val;
             }
 
-            template <class T2>
+            template <typename T2>
             constexpr operator Point2<T2>() const
             {
                 return Point2<T2>(static_cast<T2>(x), static_cast<T2>(y));
             }
 
-            Point2<T>& operator-=(const Vector2<T>& vec) const
+            template <typename T2>
+            Point2<T>& operator-=(const Vec2<T2>& vec) const
             {
                 x -= vec.x;
                 y -= vec.y;
                 return *this;
             }
 
-            constexpr Point2<T> operator-(const Vector2<T>& vec) const
+            template <typename T2>
+            Point2<T> operator-(const Vec2<T2>& vec) const
             {
                 return Point2<T>(x - vec.x, y - vec.y);
             }
 
-            Point2<T>& operator+=(const Vector2<T>& vec) const
+            template <typename T2>
+            Point2<T>& operator+=(const Vec2<T2>& vec) const
             {
                 x += vec.x;
                 y += vec.y;
                 return *this;
             }
 
-            constexpr Point2<T> operator+(const Vector2<T>& vec) const
+            template <typename T2>
+            Point2<T> operator+(const Vec2<T2>& vec) const
             {
                 return Point2<T>(x + vec.x, y + vec.y);
             }
 
-            constexpr Vector2<T> operator-(const Point2<T>& p2) const
+            template <typename T2>
+            Vec2<T> operator-(const Point2<T2>& p2) const
             {
-                return Vector2<T>(x - p2.x, y - p2.y);
+                return Vec2<T>(x - p2.x, y - p2.y);
             }
 
             constexpr const T& operator[](size_t i) const
@@ -84,6 +99,7 @@ namespace geometry
     };
 
     typedef Point2<float> Point2f;
+    typedef Point2<double> Point2d;
     typedef Point2<int> Point2i;
 }
 
