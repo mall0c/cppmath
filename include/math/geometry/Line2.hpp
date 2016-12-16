@@ -40,9 +40,6 @@ namespace geometry
             Line2(const Point2<T>& p1, const Point2<T>& p2, LineType type_ = Segment);
 
         public:
-            // TODO: Fix this. Until then, leave it disabled.
-            // auto isIdentical(const Line2<T>& line) const -> bool;
-
             auto isParallel(const Line2<T>& line) const -> bool;
 
             auto intersect(const Line2<T>& line) const -> Intersection<T>;

@@ -83,11 +83,6 @@ bool testIntersect(LineType typea, LineType typeb)
             else if (typea == Ray && typeb == Ray &&
                     u.signs() != a.d.signs() && -u.signs() != b.d.signs())
             {
-                // if (a.isIdentical(b))
-                // {
-                //     error("Rays are identical but shouldn't be.", a, b);
-                //     return false;
-                // }
                 if (!a.isParallel(b))
                 {
                     error("Rays should be parallel but aren't.", a, b);
@@ -99,11 +94,6 @@ bool testIntersect(LineType typea, LineType typeb)
                 error("Lines should be parallel but aren't.", a, b);
                 return false;
             }
-            // if (!a.isIdentical(b))
-            // {
-            //     error("Lines should be identical but aren't.", a, b);
-            //     return false;
-            // }
         }
     }
     return true;
@@ -112,6 +102,9 @@ bool testIntersect(LineType typea, LineType typeb)
 template <class T>
 bool testCombos()
 {
+    // Previously it was necessary checking the different line types.
+    // But since isIdentical() has been removed it doesn't matter, but maybe
+    // it will come in handy some day.
     return testIntersect<T>(Line, Line) &&
         testIntersect<T>(Line, Ray) &&
         testIntersect<T>(Ray, Ray);

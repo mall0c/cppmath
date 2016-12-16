@@ -24,13 +24,6 @@ namespace geometry
         p(p1), d(p2 - p1), type(type_)
     {};
 
-    // TODO: Fix this.
-    // template <class T>
-    // bool Line2<T>::isIdentical(const Line2<T>& line) const
-    // {
-    //     return d.crossAlmostZero(line.d) && (intersect(line.p) || line.intersect(p));
-    // }
-
     template <class T>
     bool Line2<T>::isParallel(const Line2<T>& line) const
     {
@@ -40,7 +33,7 @@ namespace geometry
     template <class T>
     Intersection<T> Line2<T>::intersect(const Line2<T>& line) const
     {
-        if (d.crossAlmostZero(line.d)) // parallel or identical
+        if (d.crossAlmostZero(line.d)) // parallel
             return Intersection<T>();
 
         const T dx = line.p.x - p.x,
