@@ -68,6 +68,12 @@ namespace geometry
     }
 
     template <typename T, size_t N>
+    T Vector<T, N>::project(const type& vec) const
+    {
+        return dot(vec.normalized());
+    }
+
+    template <typename T, size_t N>
     Vector<T, N> Vector<T, N>::signs() const
     {
         type vec;

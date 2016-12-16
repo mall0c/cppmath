@@ -46,6 +46,11 @@ namespace geometry
             template <typename F>
             void foreach(F callback);
 
+            constexpr size_t size() const
+            {
+                return N;
+            }
+
             // Magnitude without sqrt
             double abs_sqr() const;
             double abs() const;
@@ -54,6 +59,7 @@ namespace geometry
             type normalized() const;
 
             T dot(const type& vec) const;
+            T project(const type& vec) const;
 
             // Returns a vector with the elements' signs.
             type signs() const;
