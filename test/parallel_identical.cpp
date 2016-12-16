@@ -11,51 +11,36 @@ using namespace std;
 template <class T>
 T getRandom();
 
-template <class T, bool ray>
-void printline(const char* name, const Line2<T, ray>& line);
+template <class T>
+void printline(const char* name, const Line2<T>& line);
 
-template <class T, bool rayA, bool rayB>
-void error(const char* str, const Line2<T, rayA>& a, const Line2<T, rayB>& b);
+template <class T>
+void error(const char* str, const Line2<T>& a, const Line2<T>& b);
 
-template <class T, bool rayA, bool rayB>
-bool testIntersect();
+template <class T>
+bool testIntersect(LineType typea, LineType typeb);
+
+template <class T>
+bool testCombos();
 
 int main(int argc, char *argv[])
 {
     srand(time(NULL));
 
-    if (!testIntersect<double, false, false>())
+    if (!testCombos<double>())
         return 1;
 
-    if (!testIntersect<double, false, true>())
+    if (!testCombos<float>())
         return 1;
 
-    if (!testIntersect<double, true, true>())
-        return 1;
-
-    if (!testIntersect<float, false, false>())
-        return 1;
-
-    if (!testIntersect<float, false, true>())
-        return 1;
-
-    if (!testIntersect<float, true, true>())
-        return 1;
-
-    if (!testIntersect<int, false, false>())
-        return 1;
-
-    if (!testIntersect<int, false, true>())
-        return 1;
-
-    if (!testIntersect<int, true, true>())
+    if (!testCombos<int>())
         return 1;
 
     return 0;
 }
 
-template <class T, bool rayA, bool rayB>
-void error(const char* str, const Line2<T, rayA>& a, const Line2<T, rayB>& b)
+template <class T>
+void error(const char* str, const Line2<T>& a, const Line2<T>& b)
 {
     cerr<<"-----------------------------------\nError: "<<str<<endl;
     printline("a", a);
@@ -65,17 +50,18 @@ void error(const char* str, const Line2<T, rayA>& a, const Line2<T, rayB>& b)
     cerr<<"equals zero: "<<math::almostEquals(a.d.cross(b.d), (T)0)<<endl;
 }
 
-template <class T, bool ray>
-void printline(const char* name, const Line2<T, ray>& line)
+template <class T>
+void printline(const char* name, const Line2<T>& line)
 {
-    cerr<<name<<(ray ? "(ray)" : "")<<": ("<<line.p.x<<"; "<<line.p.y<<") + u*("<<line.d.x<<"; "<<line.d.y<<")\n";
+    cerr<<name<<(line.type == Ray ? "(ray)" : line.type == Line ? "(line)" : "(segment)");
+    cerr<<": ("<<line.p.x<<"; "<<line.p.y<<") + u*("<<line.d.x<<"; "<<line.d.y<<")\n";
 }
 
-template <class T, bool rayA, bool rayB>
-bool testIntersect()
+template <class T>
+bool testIntersect(LineType typea, LineType typeb)
 {
-    Line2<T, rayA> a;
-    Line2<T, rayB> b;
+    Line2<T> a(typea);
+    Line2<T> b(typeb);
 
     for (int j = 0; j < 10; ++j)
     {
@@ -94,7 +80,8 @@ bool testIntersect()
                 error("Intersection detected.", a, b);
                 return false;
             }
-            else if (rayA && rayB && u.signs() != a.d.signs() && -u.signs() != b.d.signs())
+            else if (typea == Ray && typeb == Ray &&
+                    u.signs() != a.d.signs() && -u.signs() != b.d.signs())
             {
                 // if (a.isIdentical(b))
                 // {
@@ -107,9 +94,9 @@ bool testIntersect()
                     return false;
                 }
             }
-            else if (a.isParallel(b))
+            else if (!a.isParallel(b))
             {
-                error("Lines should not be parallel.", a, b);
+                error("Lines should be parallel but aren't.", a, b);
                 return false;
             }
             // if (!a.isIdentical(b))
@@ -120,6 +107,14 @@ bool testIntersect()
         }
     }
     return true;
+}
+
+template <class T>
+bool testCombos()
+{
+    return testIntersect<T>(Line, Line) &&
+        testIntersect<T>(Line, Ray) &&
+        testIntersect<T>(Ray, Ray);
 }
 
 template <class T>

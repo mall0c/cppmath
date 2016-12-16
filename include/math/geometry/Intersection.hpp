@@ -23,8 +23,8 @@ namespace geometry
             Intersection(IntersectionType type_) : type(type_) {}
             Intersection(const Vec2<T>& d) : type(AABBxAABB), delta(d) {}
             Intersection(const Point2<T>& p_) : type(LinexLine), p(p_) {}
-            Intersection(const Point2<T>& p_, const Vec2<T>& d_) :
-                type(LinexAABB), seg(p_, d_) {}
+            Intersection(const Point2<T>& p1, const Point2<T>& p2) :
+                type(LinexAABB), seg(p1, p2, Segment) {}
 
             operator bool() const
             {
@@ -40,7 +40,7 @@ namespace geometry
                     Point2<T> p;
                     Vec2<T> delta;
                 };
-                Line2<T, true> seg;
+                Line2<T> seg;
             };
     };
 }

@@ -9,6 +9,7 @@
 #define WIDTH 640
 #define HEIGHT 480
 #define SPEED 5
+#define NUM_OBJECTS 12
 
 using namespace std;
 using namespace geometry;
@@ -16,8 +17,7 @@ using namespace geometry;
 typedef Vec2f VecType;
 typedef AABBf AABBType;
 typedef Point2f PointType;
-typedef Line2f LineType;
-typedef Ray2f RayType;
+typedef Line2f LineT;
 typedef Intersection<float> IsecType;
 
 class Shape
@@ -26,7 +26,8 @@ class Shape
         enum Shapes
         {
             Line,
-            Ray,
+            Ray,        // Only used for setCursor()
+            Segment,    // Only used for setCursor()
             AABB
         };
 
@@ -40,8 +41,7 @@ class Shape
         union {
             PointType p;
             VecType pos;
-            LineType line;
-            RayType ray;
+            LineT line;
             AABBType aabb;
         };
 };
@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     window.create(sf::VideoMode(WIDTH, HEIGHT), "test", sf::Style::Close | sf::Style::Titlebar);
     window.setFramerateLimit(60);
 
-    std::vector<Shape> shapes(11);
+    std::vector<Shape> shapes(NUM_OBJECTS + 1);
     create(shapes);
 
     Shape& cursor = shapes[0];
@@ -113,6 +113,10 @@ int main(int argc, char *argv[])
                         break;
 
                     case sf::Keyboard::Num3:
+                        setCursor(cursor, Shape::Segment);
+                        break;
+
+                    case sf::Keyboard::Num4:
                         setCursor(cursor, Shape::AABB);
                         break;
 
@@ -122,19 +126,19 @@ int main(int argc, char *argv[])
                             switch (ev.key.code)
                             {
                                 case sf::Keyboard::H:
-                                    cursor.line.d.fill(-2, 0);
+                                    cursor.line.d.fill(-100, 0);
                                     break;
 
                                 case sf::Keyboard::J:
-                                    cursor.line.d.fill(0, 2);
+                                    cursor.line.d.fill(0, 100);
                                     break;
 
                                 case sf::Keyboard::K:
-                                    cursor.line.d.fill(0, -2);
+                                    cursor.line.d.fill(0, -100);
                                     break;
 
                                 case sf::Keyboard::L:
-                                    cursor.line.d.fill(2, 0);
+                                    cursor.line.d.fill(100, 0);
                                     break;
                             }
                         }
@@ -168,28 +172,20 @@ int main(int argc, char *argv[])
 
 void create(std::vector<Shape>& vec)
 {
-    for (size_t i = 1; i <= 10; ++i)
+    for (size_t i = 1; i <= NUM_OBJECTS; ++i)
     {
-        // vec[i] = Shape();
-        switch (i % 3)
+        if (i % 4 == 3)
         {
-            case 0:
-                vec[i].type = Shape::Line;
-                vec[i].line = LineType(PointType(rand() % WIDTH, rand() % HEIGHT),
-                        VecType::fromDirection(10, rand() % 360));
-                break;
-
-            case 1:
-                vec[i].type = Shape::Ray;
-                vec[i].ray = RayType(PointType(rand() % WIDTH, rand() % HEIGHT),
-                        VecType::fromDirection(10, rand() % 360));
-                break;
-
-            case 2:
-                vec[i].type = Shape::AABB;
-                vec[i].aabb = AABBType(rand() % WIDTH, rand() % HEIGHT,
-                        rand() % 200, rand() % 200);
-                break;
+            vec[i].type = Shape::AABB;
+            vec[i].aabb = AABBType(rand() % WIDTH, rand() % HEIGHT,
+                    50 + rand() % 200, 50 + rand() % 200);
+        }
+        else
+        {
+            vec[i].type = Shape::Line;
+            vec[i].line = LineT(PointType(rand() % WIDTH, rand() % HEIGHT),
+                    VecType::fromDirection(rand() % 300, rand() % 360),
+                    static_cast<LineType>(i % 4));
         }
     }
 }
@@ -199,15 +195,19 @@ void setCursor(Shape& cursor, Shape::Shapes type)
     // Positions should be all aligned at the same memory offset
     PointType old = cursor.p;
 
-    cursor.type = type;
+    cursor.type = (type == Shape::AABB) ? Shape::AABB : Shape::Line;
     switch (type)
     {
         case Shape::Line:
-            cursor.line = LineType(old, VecType(1, 1));
+            cursor.line = LineT(old, VecType(1, 0));
             break;
 
         case Shape::Ray:
-            cursor.ray = RayType(old, VecType(1, 1));
+            cursor.line = LineT(old, VecType(1, 0), Ray);
+            break;
+
+        case Shape::Segment:
+            cursor.line = LineT(old, VecType(100, 0), Segment);
             break;
 
         case Shape::AABB:
@@ -222,61 +222,33 @@ void Shape::render(sf::RenderTarget& target) const
     if (type == AABB)
         drawRect(target, aabb);
     else
-        drawLine(target,
-                (type == Ray) ? (ray.p) : (line.p - line.d * 1000),
-                line.p + line.d * 1000);
+    {
+        if (line.type == LineType::Ray)
+            drawLine(target, line.p, line.p + line.d * 1000);
+        else if (line.type == LineType::Line)
+            drawLine(target, line.p - line.d * 1000, line.p + line.d * 1000);
+        else if (line.type == LineType::Segment)
+            drawLine(target, line.p, line.p + line.d);
+    }
 }
 
 void Shape::renderCollision(sf::RenderTarget& target, const Shape& shape) const
 {
     IsecType isec;
 
-    switch (type)
+    if (type == Line)
     {
-        case Line:
-            switch (shape.type)
-            {
-                case Line:
-                    isec = line.intersect(shape.line);
-                    break;
-                case Ray:
-                    isec = line.intersect(shape.ray);
-                    break;
-                case AABB:
-                    isec = line.intersect(shape.aabb);
-                    break;
-            }
-            break;
-
-        case Ray:
-            switch (shape.type)
-            {
-                case Line:
-                    isec = ray.intersect(shape.line);
-                    break;
-                case Ray:
-                    isec = ray.intersect(shape.ray);
-                    break;
-                case AABB:
-                    isec = ray.intersect(shape.aabb);
-                    break;
-            }
-            break;
-
-        case AABB:
-            switch (shape.type)
-            {
-                case Line:
-                    isec = shape.line.intersect(aabb);
-                    break;
-                case Ray:
-                    isec = shape.ray.intersect(aabb);
-                    break;
-                case AABB:
-                    isec = aabb.intersect(shape.aabb);
-                    break;
-            }
-            break;
+        if (shape.type == Line)
+            isec = line.intersect(shape.line);
+        else
+            isec = line.intersect(shape.aabb);
+    }
+    else
+    {
+        if (shape.type == Line)
+            isec = shape.line.intersect(aabb);
+        else
+            isec = aabb.intersect(shape.aabb);
     }
 
     if (isec)

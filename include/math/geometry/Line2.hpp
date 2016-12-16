@@ -9,7 +9,11 @@
 /*
  * A 2D Line implementation, based on vectors.
  * p is the starting point, and d is the direction vector.
- * If d is a zero vector then every function has undefined behaviour.
+ * If d is a zero vector, every function has undefined behaviour.
+ * A line can have different types:
+ *  Line:       Goes to infinity on both ends
+ *  Ray:        Goes to infinity in the direction of d
+ *  Segment:    Has a fixed size d
  */
 
 namespace geometry
@@ -20,42 +24,43 @@ namespace geometry
     template <class T>
     class AABB;
 
-    template <class T, bool isray = false>
+    enum LineType : char
+    {
+        Line,
+        Ray,
+        Segment
+    };
+
+    template <class T>
     class Line2
     {
         public:
-            Line2() {};
-            Line2(const Point2<T>& p_, const Vec2<T>& d_);
-            Line2(const Point2<T>& p1, const Point2<T>& p2);
+            Line2(LineType type_ = Line);
+            Line2(const Point2<T>& p_, const Vec2<T>& d_, LineType type_ = Line);
+            Line2(const Point2<T>& p1, const Point2<T>& p2, LineType type_ = Segment);
 
         public:
             // TODO: Fix this. Until then, leave it disabled.
-            // template <bool isray_other>
-            // auto isIdentical(const Line2<T, isray_other>& line) const -> bool;
+            // auto isIdentical(const Line2<T>& line) const -> bool;
 
-            template <bool isray_other>
-            auto isParallel(const Line2<T, isray_other>& line) const -> bool;
+            auto isParallel(const Line2<T>& line) const -> bool;
 
-            template <bool isray_other>
-            auto intersect(const Line2<T, isray_other>& line) const -> Intersection<T>;
-
+            auto intersect(const Line2<T>& line) const -> Intersection<T>;
             auto intersect(const Point2<T>& p2) const -> bool;
             auto intersect(const AABB<T>& box) const -> Intersection<T>;
 
         private:
-            auto _intersectPointPart(const Vec2<T>& v) const -> bool;
+            auto _checkScale(double u) const -> bool;
 
         public:
             Point2<T> p; // start point
             Vec2<T> d; // direction (not normalized)
+            LineType type;
     };
 
     typedef Line2<float> Line2f;
     typedef Line2<double> Line2d;
     typedef Line2<int> Line2i;
-    typedef Line2<float, true> Ray2f;
-    typedef Line2<double, true> Ray2d;
-    typedef Line2<int, true> Ray2i;
 }
 
 #include "Line2.inl"

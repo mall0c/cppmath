@@ -9,34 +9,36 @@
 
 namespace geometry
 {
-    template <class T, bool isray>
-    Line2<T, isray>::Line2(const Point2<T>& p_, const Vec2<T>& d_) :
-        p(p_), d(d_)
+    template <class T>
+    Line2<T>::Line2(LineType type_) :
+        type(type_)
     {};
 
-    template <class T, bool isray>
-    Line2<T, isray>::Line2(const Point2<T>& p1, const Point2<T>& p2) :
-        p(p1), d(p2 - p1)
+    template <class T>
+    Line2<T>::Line2(const Point2<T>& p_, const Vec2<T>& d_, LineType type_) :
+        p(p_), d(d_), type(type_)
+    {};
+
+    template <class T>
+    Line2<T>::Line2(const Point2<T>& p1, const Point2<T>& p2, LineType type_) :
+        p(p1), d(p2 - p1), type(type_)
     {};
 
     // TODO: Fix this.
-    // template <class T, bool isray>
-    // template <bool isray_other>
-    // bool Line2<T, isray>::isIdentical(const Line2<T, isray_other>& line) const
+    // template <class T>
+    // bool Line2<T>::isIdentical(const Line2<T>& line) const
     // {
     //     return d.crossAlmostZero(line.d) && (intersect(line.p) || line.intersect(p));
     // }
 
-    template <class T, bool isray>
-    template <bool isray_other>
-    bool Line2<T, isray>::isParallel(const Line2<T, isray_other>& line) const
+    template <class T>
+    bool Line2<T>::isParallel(const Line2<T>& line) const
     {
-        return d.crossAlmostZero(line.d) && !intersect(line.p) && (!isray || !isray_other || !line.intersect(p));
+        return d.crossAlmostZero(line.d);
     }
 
-    template <class T, bool isray>
-    template <bool isray_other>
-    Intersection<T> Line2<T, isray>::intersect(const Line2<T, isray_other>& line) const
+    template <class T>
+    Intersection<T> Line2<T>::intersect(const Line2<T>& line) const
     {
         if (d.crossAlmostZero(line.d)) // parallel or identical
             return Intersection<T>();
@@ -46,22 +48,14 @@ namespace geometry
         const double m = d.y * line.d.x - d.x * line.d.y,
                      u = (line.d.x * dy - line.d.y * dx) / m;
 
-        if ((!isray || u >= 0) && (!isray_other || (d.x * dy - d.y * dx) / m >= 0))
+        if (_checkScale(u) && line._checkScale((d.x * dy - d.y * dx) / m))
             return Intersection<T>(p + d * u);
 
         return Intersection<T>();
     }
 
-    template <class T, bool isray>
-    bool Line2<T, isray>::intersect(const Point2<T>& p2) const
-    {
-        // If the area of the parallelogram created by these 2 vectors
-        // is 0, then they are identical. This means p2 is on this line.
-        return _intersectPointPart(p2 - p);
-    }
-
-    template <class T, bool isray>
-    Intersection<T> Line2<T, isray>::intersect(const AABB<T>& box) const
+    template <class T>
+    Intersection<T> Line2<T>::intersect(const AABB<T>& box) const
     {
         // Adapted from http://noonat.github.io/intersect/#aabb-vs-segment
 
@@ -106,27 +100,51 @@ namespace geometry
             near.y = (box.pos[j] + ((s != 1) ? 0 : box.size[j]) - p[j]) / d[j];
         }
 
-        Point2<T> p1(p + d * near.x),
-                  p2(p + d * near.y);
+        if (type != Line && near.y < 0)
+            return Intersection<T>();
 
-        // Ray check
-        if (isray && near.x < 0)
-        {
-            if (near.y >= 0)
-                p1 = p;
-            else
-                return Intersection<T>();
-        }
+        if (type == Segment && near.x > 1)
+            return Intersection<T>();
 
-        // TODO: Line segment check
+        if (type != Line && near.x < 0)
+            near.x = 0;
 
-        return Intersection<T>(p1, p2 - p1);
+        if (type == Segment && near.y > 1)
+            near.y = 1;
+
+        return Intersection<T>(Point2<T>(p + d * near.x),
+                               Point2<T>(p + d * near.y));
     }
 
-    template <class T, bool isray>
-    inline bool Line2<T, isray>::_intersectPointPart(const Vec2<T>& v) const
+    template <class T>
+    bool Line2<T>::intersect(const Point2<T>& p2) const
     {
-        return d.crossAlmostZero(v) && (!isray || d.signs() == v.signs());
+        for (size_t i = 0; i < d.size(); ++i)
+        {
+            if (math::almostEquals(d[i], (T)0))
+            {
+                if (!math::almostEquals(p2[i], p[i]))
+                    return false;
+
+                size_t j = (i + 1) % 2;
+                return _checkScale((p2[j] - p[j]) / (double)d[j]);
+            }
+        }
+
+        auto v = (p2 - p) / (Vec2d)d;
+        if (!math::almostEquals(v.x, v.y))
+            return false;
+        return _checkScale(v.x);
+    }
+
+    template <class T>
+    inline bool Line2<T>::_checkScale(double u) const
+    {
+        if (type == Ray)
+            return u >= 0;
+        if (type == Segment)
+            return u >= 0 && u <= 1;
+        return true;
     }
 }
 
