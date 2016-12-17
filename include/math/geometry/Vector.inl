@@ -3,6 +3,7 @@
 
 #include "Vector.hpp"
 #include "../TypeTraits.hpp" // almostEquals
+#include "Point2.hpp"
 
 #define _FOREACH_VECTOR(var, op) for (size_t (var) = 0; (var) < N; ++(var)) { op }
 
@@ -126,6 +127,19 @@ namespace geometry
         )
     }
 
+    template <typename T, size_t N>
+    template <size_t M, typename>
+    const Point2<T>& Vector<T, N>::asPoint() const
+    {
+        return *reinterpret_cast<const Point2<T>*>(this);
+    }
+
+    template <typename T, size_t N>
+    template <size_t M, typename>
+    Point2<T>& Vector<T, N>::asPoint()
+    {
+        return *reinterpret_cast<Point2<T>*>(this);
+    }
 
     template <typename T, size_t N>
     template <size_t M, typename>

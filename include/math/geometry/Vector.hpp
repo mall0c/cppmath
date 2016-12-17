@@ -9,6 +9,9 @@
 
 namespace geometry
 {
+    template <typename T>
+    class Point2;
+
     template <typename T, size_t N>
     class Vector : public VectorData<T, N>
     {
@@ -79,6 +82,14 @@ namespace geometry
             // Specific to 3D and 7D vectors.
             template <size_t M = N, typename = typename std::enable_if<M == 3 || M == 7>::type>
             type cross(const type& rhs) const;
+
+            // Specific to 2D vectors.
+            template <size_t M = N, typename = typename std::enable_if<M == 2>::type>
+            const Point2<T>& asPoint() const;
+
+            // Specific to 2D vectors.
+            template <size_t M = N, typename = typename std::enable_if<M == 2>::type>
+            Point2<T>& asPoint();
 
             // Returns the magnitude of the 3D cross product with z = 0.
             // Specific to 2D vectors.
