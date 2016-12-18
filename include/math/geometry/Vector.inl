@@ -83,29 +83,31 @@ namespace geometry
     }
 
     template <typename T, size_t N>
-    void Vector<T, N>::fill(const T& val)
+    Vector<T, N>& Vector<T, N>::fill(const T& val)
     {
         _FOREACH_VECTOR(i, _data[i] = val;)
+        return *this;
     }
 
     template <typename T, size_t N>
     template <typename... Args>
-    void Vector<T, N>::fill(const Args&... args)
+    Vector<T, N>& Vector<T, N>::fill(const Args&... args)
     {
         _fill<0>(args...);
+        return *this;
     }
 
     template <typename T, size_t N>
-    void Vector<T, N>::set(const T& val)
+    Vector<T, N>& Vector<T, N>::set(const T& val)
     {
-        fill(val);
+        return fill(val);
     }
 
     template <typename T, size_t N>
     template <typename... Args>
-    void Vector<T, N>::set(const Args&... args)
+    Vector<T, N>& Vector<T, N>::set(const Args&... args)
     {
-        fill(args...);
+        return fill(args...);
     }
 
     template <typename T, size_t N>

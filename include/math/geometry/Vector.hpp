@@ -68,13 +68,13 @@ namespace geometry
             type signs() const;
 
             template <typename... Args>
-            void fill(const Args&... args);
-            void fill(const T& val);
+            type& fill(const Args&... args);
+            type& fill(const T& val);
 
             // Wrappers around fill() for compatibility reasons
             template <typename... Args>
-            void set(const Args&... args);
-            void set(const T& val);
+            type& set(const Args&... args);
+            type& set(const T& val);
 
             bool almostEquals(const type& rhs) const;
             bool almostEquals(const type& rhs, T tolerance) const;
