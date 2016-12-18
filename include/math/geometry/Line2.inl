@@ -42,7 +42,7 @@ namespace geometry
                      u = (line.d.x * dy - line.d.y * dx) / m;
 
         if (_checkScale(u) && line._checkScale((d.x * dy - d.y * dx) / m))
-            return Intersection<T>(p + d * u);
+            return Intersection<T>(p + d * u, u);
 
         return Intersection<T>();
     }
@@ -106,7 +106,8 @@ namespace geometry
             near.y = 1;
 
         return Intersection<T>(Point2<T>(p + d * near.x),
-                               Point2<T>(p + d * near.y));
+                               Point2<T>(p + d * near.y),
+                               near);
     }
 
     template <class T>
