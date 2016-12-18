@@ -7,7 +7,7 @@
 #include <iostream>
 #include <cassert>
 
-namespace geometry
+namespace math
 {
     template <class T>
     Line2<T>::Line2(LineType type_) :
@@ -59,7 +59,7 @@ namespace geometry
         // Check if an element in d is 0.
         for (size_t i = 0; i < 2; ++i)
         {
-            if (math::almostEquals(d[i], (T)0))
+            if (almostEquals(d[i], (T)0))
             {
                 if (p[i] >= box.pos[i] && p[i] < box.pos[i] + box.size[i])
                 {
@@ -88,7 +88,7 @@ namespace geometry
         }
         else
         {
-            int s = math::sign(d[j]);
+            int s = sign(d[j]);
             near.x = (box.pos[j] + ((s == 1) ? 0 : box.size[j]) - p[j]) / d[j];
             near.y = (box.pos[j] + ((s != 1) ? 0 : box.size[j]) - p[j]) / d[j];
         }
@@ -115,9 +115,9 @@ namespace geometry
     {
         for (size_t i = 0; i < d.size(); ++i)
         {
-            if (math::almostEquals(d[i], (T)0))
+            if (almostEquals(d[i], (T)0))
             {
-                if (!math::almostEquals(p2[i], p[i]))
+                if (!almostEquals(p2[i], p[i]))
                     return false;
 
                 size_t j = (i + 1) % 2;
@@ -126,7 +126,7 @@ namespace geometry
         }
 
         auto v = (p2 - p) / (Vec2d)d;
-        if (!math::almostEquals(v.x, v.y))
+        if (!almostEquals(v.x, v.y))
             return false;
         return _checkScale(v.x);
     }

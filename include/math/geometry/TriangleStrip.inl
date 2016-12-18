@@ -3,7 +3,7 @@
 
 #include "TriangleStrip.hpp"
 
-namespace geometry
+namespace math
 {
     template <typename T>
     TriangleStrip<T>::TriangleStrip(size_t size) :

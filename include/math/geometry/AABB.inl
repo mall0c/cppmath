@@ -4,7 +4,7 @@
 #include "AABB.hpp"
 #include "../math.hpp"
 
-namespace geometry
+namespace math
 {
     template <class T>
     AABB<T>::AABB() {};

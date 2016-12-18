@@ -7,7 +7,7 @@
 
 #define _FOREACH_VECTOR(var, op) for (size_t (var) = 0; (var) < N; ++(var)) { op }
 
-namespace geometry
+namespace math
 {
     template <typename T, size_t N>
     Vector<T, N>::Vector(const T& val)
@@ -78,7 +78,7 @@ namespace geometry
     Vector<T, N> Vector<T, N>::signs() const
     {
         type vec;
-        _FOREACH_VECTOR(i, vec[i] = math::sign(_data[i]);)
+        _FOREACH_VECTOR(i, vec[i] = sign(_data[i]);)
         return vec;
     }
 

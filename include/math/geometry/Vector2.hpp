@@ -5,7 +5,7 @@
 
 // This file exists only for compatibility reasons.
 
-namespace geometry
+namespace math
 {
     template <typename T>
     using Vector2 = Vector<T, 2>;

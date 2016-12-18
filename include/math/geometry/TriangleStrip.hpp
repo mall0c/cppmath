@@ -4,7 +4,7 @@
 #include "Polygon.hpp"
 #include "Intersection.hpp"
 
-namespace geometry
+namespace math
 {
     template <typename T>
     class TriangleStrip : public Polygon<T>

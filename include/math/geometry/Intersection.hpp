@@ -5,7 +5,7 @@
 #include "Point2.hpp"
 #include "Line2.hpp"
 
-namespace geometry
+namespace math
 {
     enum IntersectionType
     {

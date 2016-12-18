@@ -3,7 +3,7 @@
 
 #include "Polygon.hpp"
 
-namespace geometry
+namespace math
 {
     template <typename T>
     Polygon<T>::Polygon(size_t size)

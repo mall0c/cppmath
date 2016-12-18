@@ -4,7 +4,7 @@
 #include "Vector.hpp"
 #include "Intersection.hpp"
 
-namespace geometry
+namespace math
 {
     template <class T>
     class AABB

@@ -16,7 +16,7 @@
  *  Segment:    Has a fixed size d
  */
 
-namespace geometry
+namespace math
 {
     template <class T>
     class Intersection;

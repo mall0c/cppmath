@@ -4,7 +4,7 @@
 #include "Vector.hpp"
 #include "../compat.hpp"
 
-namespace geometry
+namespace math
 {
     template <typename T>
     class Point2

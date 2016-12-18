@@ -5,7 +5,7 @@
 #include <time.h>
 #include <iostream>
 
-using namespace geometry;
+using namespace math;
 using namespace std;
 
 template <class T>
@@ -46,8 +46,8 @@ void error(const char* str, const Line2<T>& a, const Line2<T>& b)
     printline("a", a);
     printline("b", b);
     cerr<<"a.d x b.d: "<<a.d.cross(b.d)<<endl;
-    cerr<<"tolerance: "<<math::epsilon<T>()<<endl;
-    cerr<<"equals zero: "<<math::almostEquals(a.d.cross(b.d), (T)0)<<endl;
+    cerr<<"tolerance: "<<epsilon<T>()<<endl;
+    cerr<<"equals zero: "<<almostEquals(a.d.cross(b.d), (T)0)<<endl;
 }
 
 template <class T>

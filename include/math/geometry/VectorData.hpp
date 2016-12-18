@@ -1,7 +1,7 @@
 #ifndef CPPMATH_VECTOR_DATA_HPP
 #define CPPMATH_VECTOR_DATA_HPP
 
-namespace geometry
+namespace math
 {
     template <typename T, unsigned int N>
     struct VectorData

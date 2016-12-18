@@ -4,7 +4,7 @@
 #include <vector>
 #include "Line2.hpp"
 
-namespace geometry
+namespace math
 {
     template <typename T>
     class Polygon

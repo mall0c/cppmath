@@ -7,7 +7,7 @@
 
 // TODO: Create global functions for dot, signs, abs, ...
 
-namespace geometry
+namespace math
 {
     template <typename T>
     class Point2;
@@ -22,7 +22,7 @@ namespace geometry
             using other_type = Vector<T2, N>;
 
             template <typename T2>
-            using ResVec = Vector<math::OpResult<T, T2>, N>;
+            using ResVec = Vector<OpResult<T, T2>, N>;
 
             // Saves writing VectorData<T, N>::_data or this->_data everytime
             using VectorData<T, N>::_data;

@@ -1,6 +1,6 @@
 #include "math/geometry/Vector.hpp"
 
-using namespace geometry;
+using namespace math;
 
 int main(int argc, char *argv[])
 {

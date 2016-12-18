@@ -13,7 +13,7 @@
 #define NUM_OBJECTS 12
 
 using namespace std;
-using namespace geometry;
+using namespace math;
 
 typedef Vec2f VecT;
 typedef AABBf AABBT;
