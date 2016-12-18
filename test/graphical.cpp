@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include "math/geometry/Line2.hpp"
 #include "math/geometry/AABB.hpp"
+#include "math/geometry/TriangleStrip.hpp"
 #include <time.h>
 #include <cstdlib>
 #include <vector>
@@ -14,11 +15,12 @@
 using namespace std;
 using namespace geometry;
 
-typedef Vec2f VecType;
-typedef AABBf AABBType;
-typedef Point2f PointType;
+typedef Vec2f VecT;
+typedef AABBf AABBT;
+typedef Point2f PointT;
 typedef Line2f LineT;
-typedef Intersection<float> IsecType;
+typedef Intersection<float> IsecT;
+typedef TriangleStrip<float> PolygonT;
 
 class Shape
 {
@@ -28,31 +30,35 @@ class Shape
             Line,
             Ray,        // Only used for setCursor()
             Segment,    // Only used for setCursor()
-            AABB
+            AABB,
+            Polygon
         };
 
     public:
-        Shape() : p() {}
+        Shape() : pol() {}
+        ~Shape() {}
         void render(sf::RenderTarget& target) const;
         void renderCollision(sf::RenderTarget& target, const Shape& shape) const;
 
     public:
         Shapes type;
         union {
-            PointType p;
-            VecType pos;
+            PointT p;
+            VecT pos;
             LineT line;
-            AABBType aabb;
+            AABBT aabb;
+            PolygonT pol;
         };
 };
 
 
 void create(std::vector<Shape>& vec);
 void setCursor(Shape& cursor, Shape::Shapes type);
+void moveCursor(Shape& cursor, float x, float y);
 
-void drawRect(sf::RenderTarget& target, const AABBType& aabb, sf::Color col = sf::Color(131, 148, 150));
-void drawLine(sf::RenderTarget& target, const PointType& p1, const PointType& p2, sf::Color col = sf::Color(131, 148, 150));
-void drawPoint(sf::RenderTarget& target, const PointType& p, sf::Color c = sf::Color::Red);
+void drawRect(sf::RenderTarget& target, const AABBT& aabb, sf::Color col = sf::Color(131, 148, 150));
+void drawLine(sf::RenderTarget& target, const PointT& p1, const PointT& p2, sf::Color col = sf::Color(131, 148, 150));
+void drawPoint(sf::RenderTarget& target, const PointT& p, sf::Color c = sf::Color::Red);
 
 int main(int argc, char *argv[])
 {
@@ -89,19 +95,19 @@ int main(int argc, char *argv[])
                         break;
 
                     case sf::Keyboard::W:
-                        cursor.pos.y -= SPEED;
+                        moveCursor(cursor, 0, -SPEED);
                         break;
 
                     case sf::Keyboard::S:
-                        cursor.pos.y += SPEED;
+                        moveCursor(cursor, 0, SPEED);
                         break;
 
                     case sf::Keyboard::A:
-                        cursor.pos.x -= SPEED;
+                        moveCursor(cursor, -SPEED, 0);
                         break;
 
                     case sf::Keyboard::D:
-                        cursor.pos.x += SPEED;
+                        moveCursor(cursor, SPEED, 0);
                         break;
 
                     case sf::Keyboard::Num1:
@@ -120,8 +126,12 @@ int main(int argc, char *argv[])
                         setCursor(cursor, Shape::AABB);
                         break;
 
+                    case sf::Keyboard::Num5:
+                        setCursor(cursor, Shape::Polygon);
+                        break;
+
                     default:
-                        if (cursor.type != Shape::AABB)
+                        if (cursor.type == Shape::Line)
                         {
                             switch (ev.key.code)
                             {
@@ -142,14 +152,25 @@ int main(int argc, char *argv[])
                                     break;
                             }
                         }
+                        else if (cursor.type == Shape::Polygon)
+                        {
+                            auto p = sf::Mouse::getPosition() - window.getPosition();
+                            if (ev.key.code == sf::Keyboard::H)
+                                cursor.pol.edit(0, PointT((float)p.x, (float)p.y));
+                        }
                         break;
                 }
             }
             else if (ev.type == sf::Event::MouseMoved &&
-                    cursor.type != Shape::AABB)
+                    cursor.type == Shape::Line)
             {
                 cursor.line.d.x = ev.mouseMove.x - cursor.line.p.x;
                 cursor.line.d.y = ev.mouseMove.y - cursor.line.p.y;
+            }
+            else if (ev.type == sf::Event::MouseButtonPressed &&
+                    cursor.type == Shape::Polygon)
+            {
+                cursor.pol.add(PointT(ev.mouseButton.x, ev.mouseButton.y));
             }
         }
 
@@ -177,14 +198,14 @@ void create(std::vector<Shape>& vec)
         if (i % 4 == 3)
         {
             vec[i].type = Shape::AABB;
-            vec[i].aabb = AABBType(rand() % WIDTH, rand() % HEIGHT,
+            vec[i].aabb = AABBT(rand() % WIDTH, rand() % HEIGHT,
                     50 + rand() % 200, 50 + rand() % 200);
         }
         else
         {
             vec[i].type = Shape::Line;
-            vec[i].line = LineT(PointType(rand() % WIDTH, rand() % HEIGHT),
-                    VecType::fromDirection(rand() % 300, rand() % 360),
+            vec[i].line = LineT(PointT(rand() % WIDTH, rand() % HEIGHT),
+                    VecT::fromDirection(rand() % 300, rand() % 360),
                     static_cast<LineType>(i % 4));
         }
     }
@@ -193,34 +214,57 @@ void create(std::vector<Shape>& vec)
 void setCursor(Shape& cursor, Shape::Shapes type)
 {
     // Positions should be all aligned at the same memory offset
-    PointType old = cursor.p;
+    PointT old = cursor.p;
 
-    cursor.type = (type == Shape::AABB) ? Shape::AABB : Shape::Line;
+    if (type == Shape::Ray || type == Shape::Segment)
+        cursor.type = Shape::Line;
+    else
+        cursor.type = type;
+
     switch (type)
     {
         case Shape::Line:
-            cursor.line = LineT(old, VecType(1, 0));
+            cursor.line = LineT(old, VecT(1, 0));
             break;
 
         case Shape::Ray:
-            cursor.line = LineT(old, VecType(1, 0), Ray);
+            cursor.line = LineT(old, VecT(1, 0), Ray);
             break;
 
         case Shape::Segment:
-            cursor.line = LineT(old, VecType(100, 0), Segment);
+            cursor.line = LineT(old, VecT(100, 0), Segment);
             break;
 
         case Shape::AABB:
-            cursor.aabb = AABBType(old.x, old.y, 100, 70);
+            cursor.aabb = AABBT(old.x, old.y, 100, 70);
+            break;
+
+        case Shape::Polygon:
+            cursor.pol = PolygonT(5);
+            cursor.pol.setOffset(old.x, old.y);
             break;
     }
 }
 
+void moveCursor(Shape& cursor, float x, float y)
+{
+    if (cursor.type == Shape::Polygon)
+        cursor.pol.move(x, y);
+    else
+        cursor.pos += VecT(x, y);
+}
 
 void Shape::render(sf::RenderTarget& target) const
 {
     if (type == AABB)
         drawRect(target, aabb);
+    else if (type == Polygon)
+    {
+        pol.foreachSegment([&](const LineT& seg) {
+            drawLine(target, seg.p, seg.p + seg.d);
+        });
+        drawRect(target, pol.getBBox(), sf::Color::Magenta);
+    }
     else
     {
         if (line.type == LineType::Ray)
@@ -234,21 +278,28 @@ void Shape::render(sf::RenderTarget& target) const
 
 void Shape::renderCollision(sf::RenderTarget& target, const Shape& shape) const
 {
-    IsecType isec;
+    IsecT isec;
 
     if (type == Line)
     {
         if (shape.type == Line)
             isec = line.intersect(shape.line);
-        else
+        else if (shape.type == AABB)
             isec = line.intersect(shape.aabb);
+        else
+            isec = shape.pol.intersect(line);
     }
-    else
+    else if (type == AABB)
     {
         if (shape.type == Line)
             isec = shape.line.intersect(aabb);
         else
             isec = aabb.intersect(shape.aabb);
+    }
+    else
+    {
+        if (shape.type == Line)
+            isec = pol.intersect(shape.line);
     }
 
     if (isec)
@@ -259,7 +310,7 @@ void Shape::renderCollision(sf::RenderTarget& target, const Shape& shape) const
         }
         else if (isec.type == AABBxAABB)
         {
-            AABBType rect(aabb);
+            AABBT rect(aabb);
             if (abs(isec.delta.x) < abs(isec.delta.y))
                 rect.pos.x -= isec.delta.x;
             else
@@ -268,8 +319,8 @@ void Shape::renderCollision(sf::RenderTarget& target, const Shape& shape) const
         }
         else if (isec.type == LinexAABB)
         {
-            const PointType& p1 = isec.seg.p;
-            PointType p2 = p1 + isec.seg.d;
+            const PointT& p1 = isec.seg.p;
+            PointT p2 = p1 + isec.seg.d;
 
             drawPoint(target, p1);
             drawLine(target, p1, p2, sf::Color::Magenta);
@@ -277,7 +328,7 @@ void Shape::renderCollision(sf::RenderTarget& target, const Shape& shape) const
     }
 }
 
-void drawRect(sf::RenderTarget& target, const AABBType& aabb, sf::Color col)
+void drawRect(sf::RenderTarget& target, const AABBT& aabb, sf::Color col)
 {
     sf::RectangleShape c(sf::Vector2f(aabb.size.x, aabb.size.y));
     c.setPosition(aabb.pos.x, aabb.pos.y);
@@ -287,7 +338,7 @@ void drawRect(sf::RenderTarget& target, const AABBType& aabb, sf::Color col)
     target.draw(c);
 }
 
-void drawLine(sf::RenderTarget& target, const PointType& p1, const PointType& p2, sf::Color col)
+void drawLine(sf::RenderTarget& target, const PointT& p1, const PointT& p2, sf::Color col)
 {
     sf::Vertex v[] = {
         sf::Vertex(sf::Vector2f(p1.x, p1.y), col),
@@ -296,7 +347,7 @@ void drawLine(sf::RenderTarget& target, const PointType& p1, const PointType& p2
     target.draw(v, 2, sf::Lines);
 }
 
-void drawPoint(sf::RenderTarget& target, const PointType& p, sf::Color col)
+void drawPoint(sf::RenderTarget& target, const PointT& p, sf::Color col)
 {
     sf::CircleShape c(3);
     c.setOrigin(3, 3);
