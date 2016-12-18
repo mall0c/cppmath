@@ -19,7 +19,7 @@ namespace geometry
             // anymore. Consider removing it.
             void crop(const AABB<T>& rect);
 
-            bool contains(const Vec2<T>& point) const;
+            bool contains(const Point2<T>& point) const;
             bool contains(const AABB<T>& rect) const;
             Intersection<T> intersect(const AABB<T>& rect) const;
 

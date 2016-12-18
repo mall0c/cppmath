@@ -44,9 +44,9 @@ namespace geometry
 
 
     template <class T>
-    bool AABB<T>::contains(const Vec2<T>& point) const
+    bool AABB<T>::contains(const Point2<T>& point) const
     {
-        return point >= pos && point < pos + size;
+        return point.asVector() >= pos && point.asVector() < pos + size;
     }
 
     template <class T>
