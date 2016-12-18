@@ -318,13 +318,21 @@ namespace geometry
     template <typename T, size_t N>
     bool Vector<T, N>::operator<=(const type& p) const
     {
-        return !(*this > p);
+        _FOREACH_VECTOR(i,
+            if (_data[i] > p[i])
+                return false;
+        )
+        return true;
     }
 
     template <typename T, size_t N>
     bool Vector<T, N>::operator>=(const type& p) const
     {
-        return !(*this < p);
+        _FOREACH_VECTOR(i,
+            if (_data[i] < p[i])
+                return false;
+        )
+        return true;
     }
 
     template <typename T, size_t N>
