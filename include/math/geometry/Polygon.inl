@@ -57,6 +57,11 @@ namespace math
         _bbox.pos.y += y;
     }
 
+    template <typename T>
+    const Vec2<T>& Polygon<T>::getOffset() const
+    {
+        return _offset;
+    }
 
     template <typename T>
     const AABB<T>& Polygon<T>::getBBox() const

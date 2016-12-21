@@ -28,7 +28,8 @@ namespace math
             auto getRaw(int i) const -> const Point2<T>&;
 
             auto setOffset(T x, T y) -> void;
-            auto move(T x, T y) -> void;
+            auto move(T x, T y)      -> void;
+            auto getOffset() const   -> const Vec2<T>&;
 
             // Returns the bounding box with offset applied
             auto getBBox() const -> const AABB<T>&;
