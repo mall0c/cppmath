@@ -26,8 +26,8 @@ namespace math
             Intersection(const Vec2<T>& d) : type(AABBxAABB), delta(d) {}
 
             // Line vs Line
-            Intersection(const Point2<T>& p_, T time_) :
-                type(LinexLine), time(time_), p(p_) {}
+            Intersection(const Point2<T>& p_, const Vec2<T>& times_) :
+                type(LinexLine), times(times_), p(p_) {}
 
             // Line vs AABB
             Intersection(const Point2<T>& p1, const Point2<T>& p2, const Vec2<T>& times_) :
@@ -41,9 +41,9 @@ namespace math
         public:
             IntersectionType type;
             union {
-                T time;         // Line vs Line
-                Vec2<T> times;  // Line vs Line
-                struct {        // Line vs AABB
+                T time;
+                Vec2<T> times;
+                struct {
                     T near;
                     T far;
                 };

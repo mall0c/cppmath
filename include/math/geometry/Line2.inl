@@ -39,10 +39,11 @@ namespace math
         const T dx = line.p.x - p.x,
                 dy = line.p.y - p.y;
         const double m = d.y * line.d.x - d.x * line.d.y,
-                     u = (line.d.x * dy - line.d.y * dx) / m;
+                     u = (line.d.x * dy - line.d.y * dx) / m,
+                     v = (d.x * dy - d.y * dx) / m;
 
-        if (_checkScale(u) && line._checkScale((d.x * dy - d.y * dx) / m))
-            return Intersection<T>(p + d * u, u);
+        if (_checkScale(u) && line._checkScale(v))
+            return Intersection<T>(p + d * u, Vec2<T>(u, v));
 
         return Intersection<T>();
     }
