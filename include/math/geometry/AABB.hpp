@@ -33,8 +33,15 @@ namespace math
             operator AABB<T2>() const;
 
         public:
-            Vec2<T> pos;
-            Vec2<T> size;
+            union {
+                struct {
+                    Vec2<T> pos;
+                    Vec2<T> size;
+                };
+                struct {
+                    T x, y, w, h;
+                };
+            };
     };
 
     typedef AABB<float> AABBf;
