@@ -7,18 +7,21 @@
 namespace math
 {
     template <class T>
-    AABB<T>::AABB() {};
+    AABB<T>::AABB() :
+        pos(),
+        size()
+    {};
 
     template <class T>
     AABB<T>::AABB(T x, T y, T w, T h) :
-            pos(x, y),
-            size(w, h)
+        pos(x, y),
+        size(w, h)
     {};
 
     template <class T>
     AABB<T>::AABB(const Vec2<T>& pos_, const Vec2<T>& size_) :
-            pos(pos_),
-            size(size_)
+        pos(pos_),
+        size(size_)
     {};
 
     template <class T>
