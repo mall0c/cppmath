@@ -3,6 +3,7 @@
 #include "math/geometry/Line2.hpp"
 #include "math/geometry/AABB.hpp"
 #include "math/geometry/TriangleStrip.hpp"
+#include "math/geometry/LineStrip.hpp"
 #include <time.h>
 #include <cstdlib>
 #include <vector>
@@ -21,6 +22,7 @@ typedef Point2f PointT;
 typedef Line2f LineT;
 typedef Intersection<float> IsecT;
 typedef TriangleStrip<float> PolygonT;
+typedef LineStrip<float> LineStripT;
 
 class Shape
 {
@@ -31,7 +33,8 @@ class Shape
             Ray,        // Only used for setCursor()
             Segment,    // Only used for setCursor()
             AABB,
-            Polygon
+            Polygon,
+            LineStrip
         };
 
     public:
@@ -48,6 +51,7 @@ class Shape
             LineT line;
             AABBT aabb;
             PolygonT pol;
+            LineStripT linestrip;
         };
 };
 
@@ -135,6 +139,10 @@ int main(int argc, char *argv[])
                         cursor.pol.setInvert(true);
                         break;
 
+                    case sf::Keyboard::Num7:
+                        setCursor(cursor, Shape::LineStrip);
+                        break;
+
                     default:
                         if (cursor.type == Shape::Line)
                         {
@@ -157,7 +165,7 @@ int main(int argc, char *argv[])
                                     break;
                             }
                         }
-                        else if (cursor.type == Shape::Polygon)
+                        else if (cursor.type == Shape::Polygon || cursor.type == Shape::LineStrip)
                         {
                             auto p = sf::Mouse::getPosition() - window.getPosition();
                             if (ev.key.code == sf::Keyboard::H)
@@ -173,7 +181,7 @@ int main(int argc, char *argv[])
                 cursor.line.d.y = ev.mouseMove.y - cursor.line.p.y;
             }
             else if (ev.type == sf::Event::MouseButtonPressed &&
-                    cursor.type == Shape::Polygon)
+                    (cursor.type == Shape::Polygon || cursor.type == Shape::LineStrip))
             {
                 cursor.pol.add(PointT(ev.mouseButton.x, ev.mouseButton.y));
             }
@@ -248,12 +256,17 @@ void setCursor(Shape& cursor, Shape::Shapes type)
             cursor.pol = PolygonT(5);
             cursor.pol.setOffset(old.x, old.y);
             break;
+
+        case Shape::LineStrip:
+            cursor.linestrip = LineStripT(5);
+            cursor.linestrip.setOffset(old.x, old.y);
+            break;
     }
 }
 
 void moveCursor(Shape& cursor, float x, float y)
 {
-    if (cursor.type == Shape::Polygon)
+    if (cursor.type == Shape::Polygon || cursor.type == Shape::LineStrip)
         cursor.pol.move(x, y);
     else
         cursor.pos += VecT(x, y);
@@ -266,6 +279,13 @@ void Shape::render(sf::RenderTarget& target) const
     else if (type == Polygon)
     {
         pol.foreachSegment([&](const LineT& seg) {
+            drawLine(target, seg.p, seg.p + seg.d);
+        });
+        drawRect(target, pol.getBBox(), sf::Color::Magenta);
+    }
+    else if (type == LineStrip)
+    {
+        linestrip.foreachSegment([&](const LineT& seg) {
             drawLine(target, seg.p, seg.p + seg.d);
         });
         drawRect(target, pol.getBBox(), sf::Color::Magenta);
@@ -285,26 +305,35 @@ void Shape::renderCollision(sf::RenderTarget& target, const Shape& shape) const
 {
     IsecT isec;
 
-    if (type == Line)
+    switch (type)
     {
-        if (shape.type == Line)
-            isec = line.intersect(shape.line);
-        else if (shape.type == AABB)
-            isec = line.intersect(shape.aabb);
-        else
-            isec = shape.pol.intersect(line);
-    }
-    else if (type == AABB)
-    {
-        if (shape.type == Line)
-            isec = shape.line.intersect(aabb);
-        else
-            isec = aabb.intersect(shape.aabb);
-    }
-    else
-    {
-        if (shape.type == Line)
-            isec = pol.intersect(shape.line);
+        case Line:
+            if (shape.type == Line)
+                isec = line.intersect(shape.line);
+            else if (shape.type == AABB)
+                isec = line.intersect(shape.aabb);
+            else if (shape.type == Polygon)
+                isec = shape.pol.intersect(line);
+            else
+                isec = shape.linestrip.intersect(line);
+            break;
+
+        case AABB:
+            if (shape.type == Line)
+                isec = shape.line.intersect(aabb);
+            else
+                isec = aabb.intersect(shape.aabb);
+            break;
+
+        case Polygon:
+            if (shape.type == Line)
+                isec = pol.intersect(shape.line);
+            break;
+
+        case LineStrip:
+            if (shape.type == Line)
+                isec = linestrip.intersect(shape.line);
+            break;
     }
 
     if (isec)
