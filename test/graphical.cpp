@@ -316,6 +316,10 @@ void Shape::renderCollision(sf::RenderTarget& target, const Shape& shape) const
             else
                 rect.pos.y -= isec.delta.y;
             drawRect(target, rect, sf::Color::Magenta);
+
+            auto p = shape.aabb.pos.asPoint() + shape.aabb.size / 2.0
+                + shape.aabb.size / 2.0 * isec.normal;
+            drawLine(target, p, p + isec.normal * 10, sf::Color::Green);
         }
         else if (isec.type == LinexAABB)
         {
@@ -325,6 +329,9 @@ void Shape::renderCollision(sf::RenderTarget& target, const Shape& shape) const
             drawPoint(target, p1);
             drawLine(target, p1, p2, sf::Color::Magenta);
         }
+
+        if (isec.type != AABBxAABB)
+            drawLine(target, isec.p, isec.p + isec.normal * 10, sf::Color::Green);
     }
 }
 

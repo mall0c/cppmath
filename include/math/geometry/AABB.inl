@@ -81,8 +81,9 @@ namespace math
         if (py <= 0)
             return Intersection<T>();
 
-        return Intersection<T>(Vec2<T>(
-                    px * (dx < 0 ? -1 : 1), py * (dy < 0 ? -1 : 1)));
+        return Intersection<T>(
+                Vec2<T>(px * (dx < 0 ? -1 : 1), py * (dy < 0 ? -1 : 1)),
+                px < py ? Vec2<T>(-sign(dx), 0) : Vec2<T>(0, -sign(dy)));
     };
 
 

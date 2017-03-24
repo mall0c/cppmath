@@ -23,15 +23,16 @@ namespace math
             Intersection(IntersectionType type_) : type(type_) {}
 
             // AABB vs AABB
-            Intersection(const Vec2<T>& d) : type(AABBxAABB), delta(d) {}
+            Intersection(const Vec2<T>& d, const Vec2<T>& normal_) :
+                type(AABBxAABB), normal(normal_), delta(d) {}
 
             // Line vs Line
-            Intersection(const Point2<T>& p_, const Vec2<T>& times_) :
-                type(LinexLine), times(times_), p(p_) {}
+            Intersection(const Point2<T>& p_, const Vec2<T>& times_, const Vec2<T>& normal_) :
+                type(LinexLine), normal(normal_), times(times_), p(p_) {}
 
             // Line vs AABB
-            Intersection(const Point2<T>& p1, const Point2<T>& p2, const Vec2<T>& times_) :
-                type(LinexAABB), times(times_), seg(p1, p2, Segment) {}
+            Intersection(const Point2<T>& p1, const Point2<T>& p2, const Vec2<T>& times_, const Vec2<T>& normal_) :
+                type(LinexAABB), normal(normal_), times(times_), seg(p1, p2, Segment) {}
 
             operator bool() const
             {
@@ -40,6 +41,7 @@ namespace math
 
         public:
             IntersectionType type;
+            Vec2<T> normal;
             union {
                 T time;
                 Vec2<T> times;

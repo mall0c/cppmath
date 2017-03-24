@@ -4,8 +4,6 @@
 #include "Line2.hpp"
 #include "Intersection.hpp"
 #include "AABB.hpp"
-#include <iostream>
-#include <cassert>
 
 namespace math
 {
@@ -42,10 +40,14 @@ namespace math
                      u = (line.d.x * dy - line.d.y * dx) / m,
                      v = (d.x * dy - d.y * dx) / m;
 
-        if (_checkScale(u) && line._checkScale(v))
-            return Intersection<T>(p + d * u, Vec2<T>(u, v));
+        if (!_checkScale(u) || !line._checkScale(v))
+            return Intersection<T>();
 
-        return Intersection<T>();
+
+        // Make the normal always face the current line
+        Vec2<T> normal(line.d.y * sign(m), -line.d.x * sign(m));
+        normal.normalize();
+        return Intersection<T>(p + d * u, Vec2<T>(u, v), normal);
     }
 
     template <class T>
@@ -73,10 +75,11 @@ namespace math
 
         // near will be reused to store the final near and far time.
         Vec2d near;
+        Vec2<T> signs = d.signs();
+        Vec2<T> normal;
 
         if (j == -1)
         {
-            auto signs = d.signs();
             Vec2d half = box.size / 2.0;
             near      = ((box.pos + half) - signs * half - p.asVector()) / d;
             Vec2d far = ((box.pos + half) + signs * half - p.asVector()) / d;
@@ -84,14 +87,20 @@ namespace math
             if (near.x > far.y || near.y > far.x)
                 return Intersection<T>();
 
+            if (near.x > near.y)
+                normal.x = -signs.x;
+            else
+                normal.y = -signs.y;
+
             near.x = std::max(near.x, near.y); // near time
             near.y = std::min(far.x, far.y); // far time
         }
         else
         {
-            int s = sign(d[j]);
+            int s = signs[j];
             near.x = (box.pos[j] + ((s == 1) ? 0 : box.size[j]) - p[j]) / d[j];
             near.y = (box.pos[j] + ((s != 1) ? 0 : box.size[j]) - p[j]) / d[j];
+            normal[j] = -s;
         }
 
         if (type != Line && near.y < 0)
@@ -108,7 +117,7 @@ namespace math
 
         return Intersection<T>(Point2<T>(p + d * near.x),
                                Point2<T>(p + d * near.y),
-                               near);
+                               near, normal);
     }
 
     template <class T>
