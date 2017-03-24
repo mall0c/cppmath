@@ -23,10 +23,10 @@ namespace math
     }
 
     template <typename T, size_t N>
-    template <typename First, typename... Args>
-    Vector<T, N>::Vector(const First& first, const Args&... args)
+    template <typename First, typename Second, typename... Args>
+    Vector<T, N>::Vector(const First& first, const Second& second, const Args&... args)
     {
-        fill(first, args...);
+        fill(first, second, args...);
     }
 
     template <typename T, size_t N>
@@ -90,24 +90,11 @@ namespace math
     }
 
     template <typename T, size_t N>
-    template <typename... Args>
-    Vector<T, N>& Vector<T, N>::fill(const Args&... args)
+    template <typename First, typename Second, typename... Args>
+    Vector<T, N>& Vector<T, N>::fill(const First& first, const Second& second, const Args&... args)
     {
-        _fill<0>(args...);
+        _fill<0>(first, second, args...);
         return *this;
-    }
-
-    template <typename T, size_t N>
-    Vector<T, N>& Vector<T, N>::set(const T& val)
-    {
-        return fill(val);
-    }
-
-    template <typename T, size_t N>
-    template <typename... Args>
-    Vector<T, N>& Vector<T, N>::set(const Args&... args)
-    {
-        return fill(args...);
     }
 
     template <typename T, size_t N>

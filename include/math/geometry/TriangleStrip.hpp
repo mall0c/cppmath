@@ -19,6 +19,7 @@ namespace math
             TriangleStrip() {};
             TriangleStrip(size_t size);
 
+            // Callback signature: (Line2<T>) -> void
             template <typename F>
             auto foreachSegment(F callback) const -> void;
 

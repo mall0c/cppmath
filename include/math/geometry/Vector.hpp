@@ -29,13 +29,14 @@ namespace math
 
         public:
             Vector() : Vector(0) {}
+
             explicit Vector(const T& val);
 
             template <typename T2>
             explicit Vector(const other_type<T2>& vec);
 
-            template <typename First, typename... Args>
-            explicit Vector(const First& first, const Args&... args);
+            template <typename First, typename Second, typename... Args>
+            explicit Vector(const First& first, const Second& second, const Args&... args);
 
             // Creates a vector of a given length in a given direction.
             // Specific to 2D vectors.
@@ -67,14 +68,9 @@ namespace math
             // Returns a vector with the elements' signs.
             type signs() const;
 
-            template <typename... Args>
-            type& fill(const Args&... args);
+            template <typename First, typename Second, typename... Args>
+            type& fill(const First& first, const Second& second, const Args&... args);
             type& fill(const T& val);
-
-            // Wrappers around fill() for compatibility reasons
-            template <typename... Args>
-            type& set(const Args&... args);
-            type& set(const T& val);
 
             bool almostEquals(const type& rhs) const;
             bool almostEquals(const type& rhs, T tolerance) const;
