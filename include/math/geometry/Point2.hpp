@@ -46,7 +46,7 @@ namespace math
             }
 
             template <typename T2>
-            Point2<T>& operator-=(const Vec2<T2>& vec) const
+            Point2<T>& operator-=(const Vec2<T2>& vec)
             {
                 x -= vec.x;
                 y -= vec.y;
@@ -60,7 +60,7 @@ namespace math
             }
 
             template <typename T2>
-            Point2<T>& operator+=(const Vec2<T2>& vec) const
+            Point2<T>& operator+=(const Vec2<T2>& vec)
             {
                 x += vec.x;
                 y += vec.y;
