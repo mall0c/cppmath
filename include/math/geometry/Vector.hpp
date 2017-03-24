@@ -22,7 +22,7 @@ namespace math
             using other_type = Vector<T2, N>;
 
             template <typename T2>
-            using ResVec = Vector<OpResult<T, T2>, N>;
+            using ResVec = Vector<typename std::common_type<T, T2>::type, N>;
 
             // Saves writing VectorData<T, N>::_data or this->_data everytime
             using VectorData<T, N>::_data;

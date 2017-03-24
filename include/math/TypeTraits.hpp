@@ -15,15 +15,6 @@
 
 namespace math
 {
-    // This type resolves the resulting type of an operation, e.g.
-    // int + float -> float
-    // int + int -> int
-    // double + int -> double
-    // ...
-    template <typename T, typename T2>
-    using OpResult = decltype(std::declval<T>() + std::declval<T2>());
-
-
     // Tolerance values for (floating point) comparison
     template <typename T>
     constexpr T epsilon()
