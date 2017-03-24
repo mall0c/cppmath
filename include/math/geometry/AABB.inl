@@ -42,6 +42,18 @@ namespace math
         }
     };
 
+    template <class T>
+    void AABB<T>::center(T x, T y)
+    {
+        pos.fill(x, y);
+    }
+
+    template <class T>
+    void AABB<T>::center(const Point2<T>& p)
+    {
+        center(p.x, p.y);
+    }
+
 
     template <class T>
     bool AABB<T>::contains(const Point2<T>& point) const

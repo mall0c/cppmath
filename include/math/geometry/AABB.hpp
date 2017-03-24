@@ -19,6 +19,9 @@ namespace math
             // anymore. Consider removing it.
             void crop(const AABB<T>& rect);
 
+            void center(T x, T y);
+            void center(const Point2<T>& p);
+
             bool contains(const Point2<T>& point) const;
             bool contains(const AABB<T>& rect) const;
             Intersection<T> intersect(const AABB<T>& rect) const;
