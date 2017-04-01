@@ -58,6 +58,9 @@ namespace math
         if (!line.intersect(_bbox))
             return Intersection<T>();
 
+        if (line.type != Line && intersect(line.p))
+            return Intersection<T>(line.p, Vec2f(), Vec2f());
+
         Intersection<T> nearest;
 
         foreachSegment([&](const Line2<T>& seg)

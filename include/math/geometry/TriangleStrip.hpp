@@ -23,10 +23,9 @@ namespace math
             template <typename F>
             auto foreachSegment(F callback) const -> void;
 
-            // NOTE: Only intersections with the individual segments of the
-            // polygon will be detected. If a line segment is completely
-            // inside the polygon, it won't collide.
-            // TODO: Maybe fix this
+            // Invert intersection detection.
+            auto setInvert(bool invert) -> void;
+
             auto intersect(const Line2<T>& line) const -> Intersection<T>;
             auto intersect(const Point2<T>& point) const -> bool;
     };
