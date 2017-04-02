@@ -12,6 +12,7 @@ namespace math
         public:
             Polygon() {};
             Polygon(size_t size);
+            virtual ~Polygon() {}
 
             // Add a new vertex
             auto add(const Point2<T>& point) -> void;

@@ -130,6 +130,11 @@ int main(int argc, char *argv[])
                         setCursor(cursor, Shape::Polygon);
                         break;
 
+                    case sf::Keyboard::Num6:
+                        setCursor(cursor, Shape::Polygon);
+                        cursor.pol.setInvert(true);
+                        break;
+
                     default:
                         if (cursor.type == Shape::Line)
                         {

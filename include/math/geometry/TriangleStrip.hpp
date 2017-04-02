@@ -16,7 +16,7 @@ namespace math
             using Polygon<T>::_getSegment;
 
         public:
-            TriangleStrip() {};
+            TriangleStrip();
             TriangleStrip(size_t size);
 
             // Callback signature: (Line2<T>) -> void
@@ -28,6 +28,9 @@ namespace math
 
             auto intersect(const Line2<T>& line) const -> Intersection<T>;
             auto intersect(const Point2<T>& point) const -> bool;
+
+        private:
+            bool _invert;
     };
 }
 

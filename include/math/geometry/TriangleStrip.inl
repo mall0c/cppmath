@@ -6,8 +6,14 @@
 namespace math
 {
     template <typename T>
+    TriangleStrip<T>::TriangleStrip() :
+        _invert(false)
+    { }
+
+    template <typename T>
     TriangleStrip<T>::TriangleStrip(size_t size) :
-        Polygon<T>(size)
+        Polygon<T>(size),
+        _invert(false)
     { }
 
     template <typename T>
@@ -27,6 +33,11 @@ namespace math
             callback(_getSegment(i - 2, i));
     }
 
+    template <typename T>
+    void TriangleStrip<T>::setInvert(bool invert)
+    {
+        _invert = invert;
+    }
 
     template <typename T>
     bool TriangleStrip<T>::intersect(const Point2<T>& point) const
@@ -35,7 +46,7 @@ namespace math
             return false;
 
         if (!_bbox.contains(point))
-            return false;
+            return _invert;
 
         Line2<T> ray(point, Vec2<T>(1, 0), Ray);
         size_t num = 0;
@@ -46,7 +57,7 @@ namespace math
                 ++num;
         });
 
-        return num % 2 == 1;
+        return num % 2 == (_invert ? 0 : 1);
     }
 
     template <typename T>
@@ -56,8 +67,14 @@ namespace math
             return Intersection<T>();
 
         if (!line.intersect(_bbox))
-            return Intersection<T>();
+        {
+            if (_invert)
+                return Intersection<T>(line.p, Vec2f(), Vec2f());
+            else
+                return Intersection<T>();
+        }
 
+        // intersect(point) already is _invert dependent
         if (line.type != Line && intersect(line.p))
             return Intersection<T>(line.p, Vec2f(), Vec2f());
 
