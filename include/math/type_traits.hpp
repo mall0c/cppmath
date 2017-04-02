@@ -4,6 +4,7 @@
 #include <type_traits>
 #include <cmath>
 #include "compat.hpp"
+#include "common_type.hpp"
 
 #ifndef CPPMATH_FLOAT_TOLERANCE
 #define CPPMATH_FLOAT_TOLERANCE 1.0e-4f

@@ -3,7 +3,7 @@
 
 #include "VectorData.hpp"
 #include "../math.hpp"
-#include "../TypeTraits.hpp"
+#include "../type_traits.hpp"
 
 // TODO: Create global functions for dot, signs, abs, ...
 
@@ -22,7 +22,7 @@ namespace math
             using other_type = Vector<T2, N>;
 
             template <typename T2>
-            using ResVec = Vector<typename std::common_type<T, T2>::type, N>;
+            using res_type = Vector<typename math::common_type<T, T2>::type, N>;
 
             // Saves writing VectorData<T, N>::_data or this->_data everytime
             using VectorData<T, N>::_data;
@@ -104,7 +104,7 @@ namespace math
 
         public:
             template <typename T2>
-            ResVec<T2> operator+(const other_type<T2>& p) const;
+            res_type<T2> operator+(const other_type<T2>& p) const;
 
             template <typename T2>
             type& operator+=(const other_type<T2>& p);
@@ -112,16 +112,16 @@ namespace math
             type operator-() const;
 
             template <typename T2>
-            ResVec<T2> operator-(const other_type<T2>& p) const;
+            res_type<T2> operator-(const other_type<T2>& p) const;
 
             template <typename T2>
             type& operator-=(const other_type<T2>& p);
 
             template <typename T2>
-            ResVec<T2> operator*(const other_type<T2>& p) const;
+            res_type<T2> operator*(const other_type<T2>& p) const;
 
             template <typename T2>
-            ResVec<T2> operator*(const T2& val) const;
+            res_type<T2> operator*(const T2& val) const;
 
             template <typename T2>
             type& operator*=(const other_type<T2>& p);
@@ -130,10 +130,10 @@ namespace math
             type& operator*=(const T2& val);
 
             template <typename T2>
-            ResVec<T2> operator/(const other_type<T2>& p) const;
+            res_type<T2> operator/(const other_type<T2>& p) const;
 
             template <typename T2>
-            ResVec<T2> operator/(const T2& val) const;
+            res_type<T2> operator/(const T2& val) const;
 
             template <typename T2>
             type& operator/=(const other_type<T2>& p);

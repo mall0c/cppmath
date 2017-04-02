@@ -3,7 +3,7 @@
 
 #include "Vector.hpp"
 #include "Point2.hpp"
-#include "../TypeTraits.hpp"
+#include "../type_traits.hpp"
 #include "../compat.hpp"
 
 /*
