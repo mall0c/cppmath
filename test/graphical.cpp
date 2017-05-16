@@ -39,12 +39,13 @@ class Shape
 
     public:
         Shape() : pol() {}
-        ~Shape() {}
+        ~Shape();
         void render(sf::RenderTarget& target) const;
         void renderCollision(sf::RenderTarget& target, const Shape& shape) const;
 
     public:
         Shapes type;
+
         union {
             PointT p;
             VecT pos;
@@ -270,6 +271,15 @@ void moveCursor(Shape& cursor, float x, float y)
         cursor.pol.move(x, y);
     else
         cursor.pos += VecT(x, y);
+}
+
+Shape::~Shape()
+{
+    // Those two need to be destructed explicitely because they store a std::vector
+    if (type == Polygon)
+        pol.~PolygonT();
+    else if (type == LineStrip)
+        linestrip.~LineStripT();
 }
 
 void Shape::render(sf::RenderTarget& target) const
