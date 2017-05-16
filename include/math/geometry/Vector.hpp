@@ -42,7 +42,7 @@ namespace math
             // Specific to 2D vectors.
             // TODO: Write this for 3D
             template <size_t M = N, typename = typename std::enable_if<M == 2>::type>
-            static type fromDirection(float length, float dir);
+            static type fromAngle(float length, float dir);
 
         public:
             // Calls a callback for each element in the vector.
@@ -55,15 +55,32 @@ namespace math
                 return N;
             }
 
-            // Magnitude without sqrt
-            double abs_sqr() const;
+            // (Squared) Magnitude of the vector.
             double abs() const;
+            double abs_sqr() const;
 
             void normalize();
             type normalized() const;
 
             T dot(const type& vec) const;
             T project(const type& vec) const;
+
+            // Returns the angle between this and another vector in
+            // degrees/radians/cosines.
+            double angle(const type& vec) const;
+            double angle_rad(const type& vec) const;
+            double angle_cos(const type& vec) const;
+
+            // Returns the direction of the vector in degrees/radians/cosines.
+            // Specific to 2D vectors.
+            template <size_t M = N, typename = typename std::enable_if<M == 2>::type>
+            double angle() const;
+
+            template <size_t M = N, typename = typename std::enable_if<M == 2>::type>
+            double angle_rad() const;
+
+            template <size_t M = N, typename = typename std::enable_if<M == 2>::type>
+            double angle_cos() const;
 
             // Returns a vector with the elements' signs.
             type signs() const;
@@ -87,6 +104,11 @@ namespace math
             template <size_t M = N, typename = typename std::enable_if<M == 2>::type>
             Point2<T>& asPoint();
 
+            // Returns a vector perpendicular to this vector.
+            // Specific to 2D vectors.
+            template <size_t M = N, typename = typename std::enable_if<M == 2>::type>
+            type ortho() const;
+
             // Returns the magnitude of the 3D cross product with z = 0.
             // Specific to 2D vectors.
             template <size_t M = N, typename = typename std::enable_if<M == 2>::type>
@@ -96,11 +118,6 @@ namespace math
             // Specific to 2D vectors.
             template <size_t M = N, typename = typename std::enable_if<M == 2>::type>
             bool crossAlmostZero(const type& rhs) const;
-
-            // Returns the direction the vector points in.
-            // Specific to 2D vectors.
-            template <size_t M = N, typename = typename std::enable_if<M == 2>::type>
-            double dir() const;
 
         public:
             template <typename T2>

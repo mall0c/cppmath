@@ -74,6 +74,38 @@ namespace math
     }
 
     template <typename T, size_t N>
+    double Vector<T, N>::angle(const type& vec) const
+    {
+        return radtodeg(angle_rad(vec));
+    }
+
+    template <typename T, size_t N>
+    double Vector<T, N>::angle_rad(const type& vec) const
+    {
+        return acos(angle_cos(vec));
+    }
+
+    template <typename T, size_t N>
+    double Vector<T, N>::angle_cos(const type& vec) const
+    {
+        return dot(vec) / (abs() * vec.abs());
+    }
+
+    template <typename T, size_t N>
+    template <size_t M, typename>
+    double Vector<T, N>::angle() const
+    {
+        return radtodeg(angle_rad());
+    }
+
+    template <typename T, size_t N>
+    template <size_t M, typename>
+    double Vector<T, N>::angle_rad() const
+    {
+        return atan2(this->y, this->x);
+    }
+
+    template <typename T, size_t N>
     Vector<T, N> Vector<T, N>::signs() const
     {
         type vec;
@@ -138,6 +170,13 @@ namespace math
 
     template <typename T, size_t N>
     template <size_t M, typename>
+    Vector<T, N> Vector<T, N>::ortho() const
+    {
+        return type(-this->y, this->x);
+    }
+
+    template <typename T, size_t N>
+    template <size_t M, typename>
     bool Vector<T, N>::crossAlmostZero(const type& rhs) const
     {
         return math::almostEquals(rhs.y * this->x, rhs.x * this->y);
@@ -156,18 +195,9 @@ namespace math
 
     template <typename T, size_t N>
     template <size_t M, typename>
-    double Vector<T, N>::dir() const
+    Vector<T, N> Vector<T, N>::fromAngle(float len, float dir)
     {
-        //angle between 2 vectors: dot(vec1, vec2) / abs(vec1) * abs(vec2)
-        //-> direction = angle between vec(x, y) and the x-axis vec(1, 0)
-        return acos(this->x / abs()) / M_PI * 180;
-    }
-
-    template <typename T, size_t N>
-    template <size_t M, typename>
-    Vector<T, N> Vector<T, N>::fromDirection(float len, float dir)
-    {
-        return type(len * cos(dir * M_PI / 180), len * sin(dir * M_PI / 180));
+        return type(len * cos(degtorad(dir)), len * sin(degtorad(dir)));
     }
 
 

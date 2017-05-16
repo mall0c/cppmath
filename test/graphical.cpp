@@ -219,7 +219,7 @@ void create(std::vector<Shape>& vec)
         {
             vec[i].type = Shape::Line;
             vec[i].line = LineT(PointT(rand() % WIDTH, rand() % HEIGHT),
-                    VecT::fromDirection(rand() % 300, rand() % 360),
+                    VecT::fromAngle(rand() % 300, rand() % 360),
                     static_cast<LineType>(i % 4));
         }
     }
