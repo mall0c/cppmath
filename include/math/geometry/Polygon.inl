@@ -16,7 +16,7 @@ namespace math
     {
         _points.push_back(point - _offset);
 
-        if (_points.size() >= 3 && !_bbox.contains(get(-1)))
+        if (_points.size() >= 2 && !_bbox.contains(get(-1)))
             _recalculate();
     }
 
@@ -24,6 +24,13 @@ namespace math
     void Polygon<T>::edit(size_t i, const Point2<T>& p)
     {
         _points[i] = p - _offset;
+        _recalculate();
+    }
+
+    template <typename T>
+    void Polygon<T>::clear()
+    {
+        _points.clear();
         _recalculate();
     }
 
@@ -79,7 +86,7 @@ namespace math
     template <typename T>
     void Polygon<T>::_recalculate()
     {
-        if (_points.size() < 3)
+        if (_points.size() < 2)
         {
             _bbox = AABB<T>();
             return;

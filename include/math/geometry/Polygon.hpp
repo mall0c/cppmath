@@ -20,6 +20,9 @@ namespace math
             // Edit the i-th vertex
             auto edit(size_t i, const Point2<T>& p) -> void;
 
+            // Remove all vertices
+            auto clear() -> void;
+
             // Return the i-th vertex with applied offset.
             // Negative indices wrap around the end, e.g. -1 -> size() - 1
             auto get(int i) const -> Point2<T>;

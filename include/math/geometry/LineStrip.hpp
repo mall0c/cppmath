@@ -19,6 +19,7 @@ namespace math
             LineStrip() {};
             LineStrip(size_t size);
 
+            // Callback signature: (const Line2<T>&) -> void
             template <typename F>
             auto foreachSegment(F callback) const -> void;
 
