@@ -23,8 +23,12 @@ namespace math
     template <typename T>
     void Polygon<T>::edit(size_t i, const Point2<T>& p)
     {
-        _points[i] = p - _offset;
-        _recalculate();
+        auto& pold = _getRaw(i);
+        if (p.x != pold.x || p.y != pold.y)
+        {
+            pold = p - _offset;
+            _recalculate();
+        }
     }
 
     template <typename T>
@@ -42,6 +46,12 @@ namespace math
 
     template <typename T>
     const Point2<T>& Polygon<T>::getRaw(int i) const
+    {
+        return _points[(i < 0) ? _points.size() + i : i];
+    }
+
+    template <typename T>
+    Point2<T>& Polygon<T>::_getRaw(int i)
     {
         return _points[(i < 0) ? _points.size() + i : i];
     }

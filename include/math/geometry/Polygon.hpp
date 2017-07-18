@@ -18,6 +18,7 @@ namespace math
             auto add(const Point2<T>& point) -> void;
 
             // Edit the i-th vertex
+            // Negative indices wrap around the end, e.g. -1 -> size() - 1
             auto edit(size_t i, const Point2<T>& p) -> void;
 
             // Remove all vertices
@@ -47,6 +48,9 @@ namespace math
             // Return a line segment from point i to point j.
             // Negative indices wrap around the end, e.g. -1 -> size() - 1
             auto _getSegment(int i, int j) const -> Line2<T>;
+
+            // non-const getRaw() version
+            auto _getRaw(int i) -> Point2<T>&;
 
         protected:
             Vec2<T> _offset;
