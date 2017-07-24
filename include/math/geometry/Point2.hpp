@@ -101,6 +101,18 @@ namespace math
     typedef Point2<float> Point2f;
     typedef Point2<double> Point2d;
     typedef Point2<int> Point2i;
+
+    template <typename T, typename T2>
+    constexpr Point2<T> snap(const Point2<T>& p, const Point2<T2> gridsize)
+    {
+        return Point2<T>(snap(p.x, gridsize.x), snap(p.y, gridsize.y));
+    }
+
+    template <typename T, typename T2>
+    constexpr Point2<T> smartSnap(const Point2<T>& p, const Point2<T2> gridsize)
+    {
+        return Point2<T>(smartSnap(p.x, gridsize.x), smartSnap(p.y, gridsize.y));
+    }
 }
 
 #endif

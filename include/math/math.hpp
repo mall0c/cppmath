@@ -10,6 +10,26 @@ namespace math
 {
     constexpr const double pi = M_PI;
 
+    double pointDistance(double x1, double y1, double x2, double y2);
+    double pointDirection(double x1, double y1, double x2, double y2);
+
+    double lengthdirX(double len, double dir);
+    double lengthdirY(double len, double dir);
+
+    double adaptDirection(double dir);
+
+    template <typename T, typename T2>
+    constexpr T snap(T x, T2 gridsize)
+    {
+        return (int)(x / gridsize) * gridsize - (x < 0 ? gridsize : 0);
+    }
+
+    template <typename T, typename T2>
+    constexpr T smartSnap(T x, T2 gridsize)
+    {
+        return round(x / gridsize) * gridsize - (x < 0 ? gridsize : 0);
+    }
+
     constexpr double radtodeg(double rad)
     {
         return rad * 180 / pi;
@@ -19,16 +39,6 @@ namespace math
     {
         return deg * pi / 180;
     }
-
-
-    double pointDistance(double x1, double y1, double x2, double y2);
-    double pointDirection(double x1, double y1, double x2, double y2);
-
-
-    double lengthdirX(double len, double dir);
-    double lengthdirY(double len, double dir);
-
-    double adaptDirection(double dir);
 
     template <typename T>
     constexpr int sign(T val)
