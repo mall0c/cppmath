@@ -13,11 +13,11 @@ namespace math
             AABB();
             AABB(T x, T y, T w, T h);
             AABB(const Vec2<T>& pos_, const Vec2<T>& size_);
+            AABB(const AABB<T>& a, const AABB<T>& b);
+            AABB(const AABB<T>& rect) = default;
 
         public:
-            // TODO: This functions was useful at some point but probably not
-            // anymore. Consider removing it.
-            void crop(const AABB<T>& rect);
+            void combine(const AABB<T>& other);
 
             void center(T x, T y);
             void center(const Point2<T>& p);

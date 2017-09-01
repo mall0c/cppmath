@@ -25,25 +25,22 @@ namespace math
     {};
 
     template <class T>
-    void AABB<T>::crop(const AABB<T>& rect)
+    AABB<T>::AABB(const AABB<T>& a, const AABB<T>& b) :
+        AABB(a)
     {
-        if (intersects(rect))
-        {
-            size += pos; //convert to "range"-rect
+        combine(b);
+    }
 
-            size.x = std::min(size.x, rect.pos.x + rect.size.x);
-            size.y = std::min(size.y, rect.pos.y + rect.size.y);
-
-            pos.x = std::max(pos.x, rect.pos.x);
-            pos.y = std::max(pos.y, rect.pos.y);
-
-            size -= pos;
-        }
-        else
-        {
-            pos = size = Vec2<T>(); //null rect
-        }
-    };
+    template <class T>
+    void AABB<T>::combine(const AABB<T>& other)
+    {
+        T newx = std::min(x, other.x),
+          newy = std::min(y, other.y);
+        w = std::max(x + w, other.x + other.w) - newx;
+        h = std::max(y + h, other.y + other.h) - newy;
+        x = newx;
+        y = newy;
+    }
 
     template <class T>
     void AABB<T>::center(T x, T y)
