@@ -39,6 +39,16 @@ namespace math
                 x = y = val;
             }
 
+            constexpr bool operator!=(const Point2<T>& p) const
+            {
+                return !operator==(p);
+            }
+
+            constexpr bool operator==(const Point2<T>& p) const
+            {
+                return x == p.x && y == p.y;
+            }
+
             template <typename T2>
             constexpr operator Point2<T2>() const
             {
