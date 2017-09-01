@@ -18,6 +18,7 @@ namespace math
 
         public:
             void combine(const AABB<T>& other);
+            void extend(const AABB<T>& other, bool center = true);
 
             void center(T x, T y);
             void center(const Point2<T>& p);

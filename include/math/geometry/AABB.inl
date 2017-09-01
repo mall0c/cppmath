@@ -43,6 +43,14 @@ namespace math
     }
 
     template <class T>
+    void AABB<T>::extend(const AABB<T>& other, bool center)
+    {
+        if (center)
+            pos -= other.size / 2;
+        size += other.size;
+    }
+
+    template <class T>
     void AABB<T>::center(T x, T y)
     {
         pos.fill(x, y);
