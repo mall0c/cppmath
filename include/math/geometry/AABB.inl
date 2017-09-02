@@ -34,6 +34,12 @@ namespace math
     template <class T>
     void AABB<T>::combine(const AABB<T>& other)
     {
+        if (size.x == 0 && size.y == 0)
+        {
+            *this = other;
+            return;
+        }
+
         T newx = std::min(x, other.x),
           newy = std::min(y, other.y);
         w = std::max(x + w, other.x + other.w) - newx;
