@@ -20,6 +20,8 @@ namespace math
             void combine(const AABB<T>& other);
             void extend(const AABB<T>& other, bool center = true);
 
+            bool isEmpty() const;
+
             void center(T x, T y);
             void center(const Point2<T>& p);
 

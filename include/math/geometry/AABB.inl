@@ -34,11 +34,13 @@ namespace math
     template <class T>
     void AABB<T>::combine(const AABB<T>& other)
     {
-        if (size.x == 0 && size.y == 0)
+        if (isEmpty())
         {
             *this = other;
             return;
         }
+        else if (other.isEmpty())
+            return;
 
         T newx = std::min(x, other.x),
           newy = std::min(y, other.y);
@@ -54,6 +56,12 @@ namespace math
         if (center)
             pos -= other.size / 2;
         size += other.size;
+    }
+
+    template <class T>
+    bool AABB<T>::isEmpty() const
+    {
+        return size.x == 0 && size.y == 0;
     }
 
     template <class T>
