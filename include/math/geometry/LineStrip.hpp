@@ -6,28 +6,53 @@
 
 namespace math
 {
-    template <typename T>
-    class LineStrip : public Polygon<T>
+    // Callback signature: (const Line2<T>&) -> bool
+    // Returning true breaks the loop.
+    template <typename T, typename F>
+    auto foreachSegmentLineStrip(const Polygon<T>& polygon, F callback) -> void
     {
-        protected:
-            using Polygon<T>::_points;
-            using Polygon<T>::_bbox;
-            using Polygon<T>::_offset;
-            using Polygon<T>::_getSegment;
+        for (size_t i = 1; i < polygon.size(); ++i)
+            if (callback(polygon.getSegment(i - 1, i)))
+                return;
+    }
 
-        public:
-            LineStrip() {};
-            LineStrip(size_t size);
+    template <typename T>
+    auto intersectLineStrip(const Polygon<T>& polygon, const Line2<T>& line) -> Intersection<T>
+    {
+        if (polygon.size() < 2)
+            return Intersection<T>();
 
-            // Callback signature: (const Line2<T>&) -> void
-            template <typename F>
-            auto foreachSegment(F callback) const -> void;
+        if (!line.intersect(polygon.getBBox()))
+            return Intersection<T>();
 
-            auto intersect(const Line2<T>& line) const -> Intersection<T>;
-            auto intersect(const Point2<T>& point) const -> bool;
-    };
+        Intersection<T> nearest;
+
+        foreachSegmentLineStrip(polygon, [&](const Line2<T>& seg)
+        {
+            auto isec = line.intersect(seg);
+            if (!nearest || (isec && isec.time < nearest.time))
+                nearest = isec;
+            return false;
+        });
+
+        return nearest;
+    }
+
+    template <typename T>
+    auto intersectLineStrip(const Polygon<T>& polygon, const Point2<T>& point) -> bool
+    {
+        if (polygon.size() < 2)
+            return false;
+
+        if (!polygon.getBBox().contains(point))
+            return false;
+
+        for (size_t i = 1; i < polygon.size(); ++i)
+            if (polygon.getSegment(i - 1, i).intersect(point))
+                return true;
+
+        return false;
+    }
 }
-
-#include "LineStrip.inl"
 
 #endif

@@ -2,8 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include "math/geometry/Line2.hpp"
 #include "math/geometry/AABB.hpp"
-#include "math/geometry/TriangleStrip.hpp"
-#include "math/geometry/LineStrip.hpp"
+#include "math/geometry/Polygon.hpp"
 #include <time.h>
 #include <cstdlib>
 #include <vector>
@@ -21,8 +20,7 @@ typedef AABBf AABBT;
 typedef Point2f PointT;
 typedef Line2f LineT;
 typedef Intersection<float> IsecT;
-typedef TriangleStrip<float> PolygonT;
-typedef LineStrip<float> LineStripT;
+typedef Polygon<float> PolygonT;
 
 class Shape
 {
@@ -34,17 +32,18 @@ class Shape
             Segment,    // Only used for setCursor()
             AABB,
             Polygon,
-            LineStrip
+            LineStrip   // Only used for setCursor()
         };
 
     public:
-        Shape() : pol() {}
+        Shape() : invert(false), pol() {}
         ~Shape();
         void render(sf::RenderTarget& target) const;
         void renderCollision(sf::RenderTarget& target, const Shape& shape) const;
 
     public:
         Shapes type;
+        bool invert;
 
         union {
             PointT p;
@@ -52,7 +51,6 @@ class Shape
             LineT line;
             AABBT aabb;
             PolygonT pol;
-            LineStripT linestrip;
         };
 };
 
@@ -115,6 +113,22 @@ int main(int argc, char *argv[])
                         moveCursor(cursor, SPEED, 0);
                         break;
 
+                    case sf::Keyboard::I:
+                        cursor.invert = !cursor.invert;
+                        break;
+
+                    case sf::Keyboard::Up:
+                    case sf::Keyboard::Right:
+                        if (cursor.type == Shape::Polygon)
+                            cursor.pol.setScale(cursor.pol.getScale() + VecT(0.2));
+                        break;
+
+                    case sf::Keyboard::Down:
+                    case sf::Keyboard::Left:
+                        if (cursor.type == Shape::Polygon)
+                            cursor.pol.setScale(cursor.pol.getScale() - VecT(0.2));
+                        break;
+
                     case sf::Keyboard::Num1:
                         setCursor(cursor, Shape::Line);
                         break;
@@ -136,11 +150,6 @@ int main(int argc, char *argv[])
                         break;
 
                     case sf::Keyboard::Num6:
-                        setCursor(cursor, Shape::Polygon);
-                        cursor.pol.setInvert(true);
-                        break;
-
-                    case sf::Keyboard::Num7:
                         setCursor(cursor, Shape::LineStrip);
                         break;
 
@@ -197,7 +206,13 @@ int main(int argc, char *argv[])
             cursor.renderCollision(window, shapes[i]);
         }
 
-        drawPoint(window, cursor.p, sf::Color::Blue);
+        PointT pos;
+        if (cursor.type == Shape::Polygon)
+            pos = cursor.pol.getOffset().asPoint();
+        else
+            pos = cursor.p;
+
+        drawPoint(window, pos, sf::Color::Blue);
 
         window.display();
     }
@@ -228,10 +243,16 @@ void create(std::vector<Shape>& vec)
 void setCursor(Shape& cursor, Shape::Shapes type)
 {
     // Positions should be all aligned at the same memory offset
-    PointT old = cursor.p;
+    PointT old;
+    if (cursor.type == Shape::Polygon)
+        old = cursor.pol.getOffset().asPoint();
+    else
+        old = cursor.p;
 
     if (type == Shape::Ray || type == Shape::Segment)
         cursor.type = Shape::Line;
+    else if (type == Shape::LineStrip)
+        cursor.type = Shape::Polygon;
     else
         cursor.type = type;
 
@@ -255,31 +276,30 @@ void setCursor(Shape& cursor, Shape::Shapes type)
 
         case Shape::Polygon:
             cursor.pol = PolygonT(5);
-            cursor.pol.setOffset(old.x, old.y);
+            cursor.pol.setOffset(old.asVector());
             break;
 
         case Shape::LineStrip:
-            cursor.linestrip = LineStripT(5);
-            cursor.linestrip.setOffset(old.x, old.y);
+            cursor.pol = PolygonT(5);
+            cursor.pol.type = LineStrip;
+            cursor.pol.setOffset(old.asVector());
             break;
     }
 }
 
 void moveCursor(Shape& cursor, float x, float y)
 {
-    if (cursor.type == Shape::Polygon || cursor.type == Shape::LineStrip)
-        cursor.pol.move(x, y);
+    if (cursor.type == Shape::Polygon)
+        cursor.pol.move(VecT(x, y));
     else
         cursor.pos += VecT(x, y);
 }
 
 Shape::~Shape()
 {
-    // Those two need to be destructed explicitely because they store a std::vector
+    // This needs to be destructed explicitely because it stores a std::vector
     if (type == Polygon)
         pol.~PolygonT();
-    else if (type == LineStrip)
-        linestrip.~LineStripT();
 }
 
 void Shape::render(sf::RenderTarget& target) const
@@ -290,13 +310,7 @@ void Shape::render(sf::RenderTarget& target) const
     {
         pol.foreachSegment([&](const LineT& seg) {
             drawLine(target, seg.p, seg.p + seg.d);
-        });
-        drawRect(target, pol.getBBox(), sf::Color::Magenta);
-    }
-    else if (type == LineStrip)
-    {
-        linestrip.foreachSegment([&](const LineT& seg) {
-            drawLine(target, seg.p, seg.p + seg.d);
+            return false;
         });
         drawRect(target, pol.getBBox(), sf::Color::Magenta);
     }
@@ -324,8 +338,6 @@ void Shape::renderCollision(sf::RenderTarget& target, const Shape& shape) const
                 isec = line.intersect(shape.aabb);
             else if (shape.type == Polygon)
                 isec = shape.pol.intersect(line);
-            else
-                isec = shape.linestrip.intersect(line);
             break;
 
         case AABB:
@@ -337,12 +349,7 @@ void Shape::renderCollision(sf::RenderTarget& target, const Shape& shape) const
 
         case Polygon:
             if (shape.type == Line)
-                isec = pol.intersect(shape.line);
-            break;
-
-        case LineStrip:
-            if (shape.type == Line)
-                isec = linestrip.intersect(shape.line);
+                isec = pol.intersect(shape.line, false, invert);
             break;
     }
 

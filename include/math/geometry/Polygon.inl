@@ -1,12 +1,23 @@
 #ifndef CPPMATH_POLYGON_INL
 #define CPPMATH_POLYGON_INL
 
+#include <cassert>
 #include "Polygon.hpp"
+#include "LineStrip.hpp"
+#include "TriangleStrip.hpp"
 
 namespace math
 {
     template <typename T>
-    Polygon<T>::Polygon(size_t size)
+    Polygon<T>::Polygon(PolygonType type_) :
+        type(type_),
+        _scale(1, 1)
+    { }
+
+    template <typename T>
+    Polygon<T>::Polygon(size_t size, PolygonType type_) :
+        type(type_),
+        _scale(1, 1)
     {
         _points.reserve(size);
     }
@@ -14,19 +25,31 @@ namespace math
     template <typename T>
     void Polygon<T>::add(const Point2<T>& point)
     {
-        _points.push_back(point - _offset);
+        addRaw(((point - _offset).asVector() / _scale).asPoint());
+    }
 
-        if (_points.size() >= 2 && !_bbox.contains(get(-1)))
+    template <typename T>
+    void Polygon<T>::addRaw(const Point2<T>& point)
+    {
+        _points.push_back(point);
+
+        if (_points.size() >= 2 && !_bbox.contains(point))
             _recalculate();
     }
 
     template <typename T>
     void Polygon<T>::edit(size_t i, const Point2<T>& p)
     {
+        editRaw(i, ((p - _offset).asVector() / _scale).asPoint());
+    }
+
+    template <typename T>
+    void Polygon<T>::editRaw(size_t i, const Point2<T>& p)
+    {
         auto& pold = _getRaw(i);
-        if (p.x != pold.x || p.y != pold.y)
+        if (p != pold)
         {
-            pold = p - _offset;
+            pold = p;
             _recalculate();
         }
     }
@@ -41,13 +64,78 @@ namespace math
     template <typename T>
     Point2<T> Polygon<T>::get(int i) const
     {
-        return getRaw(i) + _offset;
+        return (getRaw(i).asVector() * _scale + _offset).asPoint();
     }
 
     template <typename T>
     const Point2<T>& Polygon<T>::getRaw(int i) const
     {
         return _points[(i < 0) ? _points.size() + i : i];
+    }
+
+    template <typename T>
+    Line2<T> Polygon<T>::getSegment(int i, int j) const
+    {
+        return Line2<T>(get(i), get(j), Segment);
+    }
+
+    template <typename T>
+    template <typename F>
+    void Polygon<T>::foreachSegment(F callback) const
+    {
+        switch (type)
+        {
+            case LineStrip:
+                foreachSegmentLineStrip(*this, callback);
+                break;
+            case TriangleStrip:
+                foreachSegmentTriangleStrip(*this, callback);
+                break;
+            default:
+                assert(false && "currently not supported");
+        }
+    }
+
+    template <typename T>
+    Intersection<T> Polygon<T>::intersect(const Line2<T>& line) const
+    {
+        return intersect(line, false, false);
+    }
+
+    template <typename T>
+    bool Polygon<T>::intersect(const Point2<T>& point) const
+    {
+        return intersect(point, false, false);
+    }
+
+    template <typename T>
+    Intersection<T> Polygon<T>::intersect(const Line2<T>& line, bool convex, bool invert) const
+    {
+        switch (type)
+        {
+            case LineStrip:
+                return intersectLineStrip(*this, line);
+            case TriangleStrip:
+                return intersectTriangleStrip(*this, line, convex, invert);
+            default:
+                assert(false && "currently not supported");
+        }
+        return Intersection<T>();
+    }
+
+    template <typename T>
+    bool Polygon<T>::intersect(const Point2<T>& point, bool convex, bool invert) const
+    {
+        switch (type)
+        {
+            case LineStrip:
+                return intersectLineStrip(*this, point);
+            case TriangleStrip:
+                return intersectTriangleStrip(*this, point, convex, invert);
+            default:
+                assert(false && "currently not supported");
+        }
+        return false;
     }
 
     template <typename T>
@@ -58,26 +146,35 @@ namespace math
 
 
     template <typename T>
-    void Polygon<T>::setOffset(T x, T y)
+    void Polygon<T>::setOffset(const Vec2<T>& off)
     {
-        _bbox.pos -= _offset;
-        _offset.fill(x, y);
-        _bbox.pos += _offset;
+        move(off - _offset);
     }
 
     template <typename T>
-    void Polygon<T>::move(T x, T y)
+    void Polygon<T>::move(const Vec2<T>& rel)
     {
-        _offset.x += x;
-        _offset.y += y;
-        _bbox.pos.x += x;
-        _bbox.pos.y += y;
+        _offset += rel;
+        _bbox.pos += rel;
     }
 
     template <typename T>
     const Vec2<T>& Polygon<T>::getOffset() const
     {
         return _offset;
+    }
+
+    template <typename T>
+    void Polygon<T>::setScale(const Vec2<T>& scale)
+    {
+        _scale = scale;
+        _recalculate();
+    }
+
+    template <typename T>
+    const Vec2<T>& Polygon<T>::getScale() const
+    {
+        return _scale;
     }
 
     template <typename T>
@@ -102,26 +199,21 @@ namespace math
             return;
         }
 
-        Vec2f min = _points[0].asVector(),
-              max = _points[0].asVector();
+        Vec2f min = get(0).asVector(),
+              max = get(0).asVector();
 
         for (size_t i = 1; i < _points.size(); ++i)
         {
+            auto p = get(i);
             for (int k = 0; k < 2; ++k)
             {
-                min[k] = std::min(min[k], _points[i][k]);
-                max[k] = std::max(max[k], _points[i][k]);
+                min[k] = std::min(min[k], p[k]);
+                max[k] = std::max(max[k], p[k]);
             }
         }
 
-        _bbox.pos = _offset + min;
+        _bbox.pos = min;
         _bbox.size = max - min;
-    }
-
-    template <typename T>
-    Line2<T> Polygon<T>::_getSegment(int i, int j) const
-    {
-        return Line2<T>(get(i), get(j), Segment);
     }
 }
 

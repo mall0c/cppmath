@@ -6,54 +6,75 @@
 
 namespace math
 {
+    enum PolygonType
+    {
+        LineStrip,
+        TriangleStrip,
+    };
+
     template <typename T>
     class Polygon
     {
         public:
-            Polygon() {};
-            Polygon(size_t size);
-            virtual ~Polygon() {}
+            Polygon(PolygonType type = TriangleStrip);
+            Polygon(size_t size, PolygonType type = TriangleStrip);
 
             // Add a new vertex
-            auto add(const Point2<T>& point) -> void;
+            auto add(const Point2<T>& point)    -> void;
+            auto addRaw(const Point2<T>& point) -> void;
 
             // Edit the i-th vertex
             // Negative indices wrap around the end, e.g. -1 -> size() - 1
-            auto edit(size_t i, const Point2<T>& p) -> void;
+            auto edit(size_t i, const Point2<T>& p)    -> void;
+            auto editRaw(size_t i, const Point2<T>& p) -> void;
 
-            // Remove all vertices
-            auto clear() -> void;
-
-            // Return the i-th vertex with applied offset.
+            // Return the i-th vertex with/without transformation.
             // Negative indices wrap around the end, e.g. -1 -> size() - 1
             auto get(int i) const -> Point2<T>;
-
-            // Return the i-th vertex without offset.
-            // Negative indices wrap around the end, e.g. -1 -> size() - 1
             auto getRaw(int i) const -> const Point2<T>&;
 
-            auto setOffset(T x, T y) -> void;
-            auto move(T x, T y)      -> void;
-            auto getOffset() const   -> const Vec2<T>&;
+            // Return a line segment from point i to point j.
+            // Negative indices wrap around the end, e.g. -1 -> size() - 1
+            auto getSegment(int i, int j) const -> Line2<T>;
+
+            // Callback signature: (const Line2<T>&) -> bool
+            // Returning true breaks the loop.
+            template <typename F>
+            auto foreachSegment(F callback) const -> void;
+
+            auto intersect(const Line2<T>& line, bool convex, bool invert = false) const   -> Intersection<T>;
+            auto intersect(const Point2<T>& point, bool convex, bool invert = false) const -> bool;
+
+            auto intersect(const Line2<T>& line) const   -> Intersection<T>;
+            auto intersect(const Point2<T>& point) const -> bool;
+
+            auto setOffset(const Vec2<T>& off)  -> void;
+            auto getOffset() const              -> const Vec2<T>&;
+            auto move(const Vec2<T>& rel)       -> void;
+            auto setScale(const Vec2<T>& scale) -> void;
+            auto getScale() const               -> const Vec2<T>&;
 
             // Returns the bounding box with offset applied
             auto getBBox() const -> const AABB<T>&;
 
+            // Remove all vertices
+            auto clear() -> void;
+
             auto size() const -> size_t;
+
+        public:
+            PolygonType type;
 
         protected:
             // Recalculate the bounding box
             auto _recalculate() -> void;
-
-            // Return a line segment from point i to point j.
-            // Negative indices wrap around the end, e.g. -1 -> size() - 1
-            auto _getSegment(int i, int j) const -> Line2<T>;
 
             // non-const getRaw() version
             auto _getRaw(int i) -> Point2<T>&;
 
         protected:
             Vec2<T> _offset;
+            Vec2<T> _scale;
             AABB<T> _bbox;
             std::vector<Point2<T>> _points;
     };
