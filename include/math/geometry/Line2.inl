@@ -29,6 +29,12 @@ namespace math
     }
 
     template <class T>
+    T Line2<T>::distance(const Point2<T>& point) const
+    {
+        return d.normalized().dot(point.asVector());
+    }
+
+    template <class T>
     Intersection<T> Line2<T>::intersect(const Line2<T>& line) const
     {
         if (d.crossAlmostZero(line.d)) // parallel

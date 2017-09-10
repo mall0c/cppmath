@@ -42,6 +42,8 @@ namespace math
         public:
             auto isParallel(const Line2<T>& line) const -> bool;
 
+            auto distance(const Point2<T>& point) const -> T;
+
             auto intersect(const Line2<T>& line) const -> Intersection<T>;
             auto intersect(const Point2<T>& p2) const -> bool;
             auto intersect(const AABB<T>& box) const -> Intersection<T>;
