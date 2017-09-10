@@ -24,6 +24,14 @@ namespace math
         return vec;
     }
 
+    template <typename T, size_t N>
+    Vector<T, N> abs(const Vector<T, N>& vec)
+    {
+        Vector<T, N> out;
+        _FOREACH_VECTOR(i, out[i] = std::abs(vec[i]);)
+        return out;
+    }
+
 
 
     template <typename T, size_t N>

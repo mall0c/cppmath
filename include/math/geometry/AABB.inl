@@ -94,12 +94,12 @@ namespace math
     {
         // Adapted from http://noonat.github.io/intersect/#aabb-vs-aabb
         T dx = (other.pos.x + other.size.x / 2) - (pos.x + size.x / 2);
-        T px = (other.size.x / 2 + size.x / 2) - abs(dx);
+        T px = (other.size.x / 2 + size.x / 2) - std::abs(dx);
         if (px <= 0)
             return Intersection<T>();
 
         T dy = (other.pos.y + other.size.y / 2) - (pos.y + size.y / 2);
-        T py = (other.size.y / 2 + size.y / 2) - abs(dy);
+        T py = (other.size.y / 2 + size.y / 2) - std::abs(dy);
         if (py <= 0)
             return Intersection<T>();
 
