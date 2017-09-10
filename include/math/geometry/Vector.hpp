@@ -182,6 +182,12 @@ namespace math
             void _fill(const U& val);
     };
 
+    template <typename T, size_t N>
+    auto min(const Vector<T, N>& a, const Vector<T, N>& b) -> Vector<T, N>;
+
+    template <typename T, size_t N>
+    auto max(const Vector<T, N>& a, const Vector<T, N>& b) -> Vector<T, N>;
+
     typedef Vector<float, 2> Vec2f;
     typedef Vector<float, 3> Vec3f;
     typedef Vector<double, 2> Vec2d;

@@ -9,6 +9,24 @@
 namespace math
 {
     template <typename T, size_t N>
+    Vector<T, N> min(const Vector<T, N>& a, const Vector<T, N>& b)
+    {
+        Vector<T, N> vec;
+        _FOREACH_VECTOR(i, vec[i] = std::min(a[i], b[i]);)
+        return vec;
+    }
+
+    template <typename T, size_t N>
+    Vector<T, N> max(const Vector<T, N>& a, const Vector<T, N>& b)
+    {
+        Vector<T, N> vec;
+        _FOREACH_VECTOR(i, vec[i] = std::max(a[i], b[i]);)
+        return vec;
+    }
+
+
+
+    template <typename T, size_t N>
     Vector<T, N>::Vector(const T& val)
     {
         fill(val);
