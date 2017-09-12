@@ -1,6 +1,7 @@
 #ifndef CPPMATH_AABB_INL
 #define CPPMATH_AABB_INL
 
+#include <cassert>
 #include "AABB.hpp"
 #include "../math.hpp"
 
@@ -114,6 +115,110 @@ namespace math
                 px < py ? Vec2<T>(-sign(dx), 0) : Vec2<T>(0, -sign(dy)));
     };
 
+    template <class T>
+    Intersection<T> AABB<T>::sweep(const Vec2<T>& vel, AABB<T> box) const
+    {
+        box.extend(*this);
+        return Line2<T>(getCenter().asPoint(), vel, Segment).intersect(box);
+    }
+
+    template <class T>
+    Intersection<T> AABB<T>::sweep(const Vec2<T>& vel, const Polygon<T>& pol) const
+    {
+        Intersection<T> nearest;
+        pol.foreachSegment([&](const Line2<T>& seg) {
+                auto isec = sweep(vel, seg);
+                if (!nearest || (isec && isec.time < nearest.time))
+                    nearest = isec;
+                return false;
+            });
+        return nearest;
+    }
+
+    template <class T>
+    Intersection<T> AABB<T>::sweep(const Vec2<T>& vel, const Line2<T>& line) const
+    {
+        // Based on https://gamedev.stackexchange.com/questions/29479/swept-aabb-vs-line-segment-2d
+        // Praise OP
+
+        // TODO: support rays
+        assert(line.type != Ray && "Rays are not supported yet");
+
+        auto half = size / 2;
+        auto center = pos + half;
+        auto ln = line.d.ortho().normalized(); // line normal
+        auto dist = ln.dot(line.p.asVector() - center);
+
+        if (dist < 0)
+            ln *= -1;
+
+        dist = std::abs(dist);
+        auto r = half.x * std::abs(ln.x) + half.y * std::abs(ln.y);
+        auto velproj = ln.dot(vel);
+
+        if (velproj < 0)
+            r *= -1;
+
+        Vec2<T> times(std::max((dist - r) / velproj, 0.0f),
+                      std::min((dist + r) / velproj, 1.0f));
+
+        if (line.type == Segment)
+        { // AABB vs AABB sweep
+            AABB<T> linebox = line.getBBox();
+            Vec2<T> aabbmax = pos + size;
+            Vec2<T> lineMax = linebox.pos + linebox.size;
+
+            // X axis overlap
+            if (vel.x < 0) //Sweeping left
+            {
+                if (aabbmax.x < linebox.pos.x)
+                    return Intersection<T>();
+                times[0] = std::max((lineMax.x - pos.x) / vel.x, times[0]);
+                times[1] = std::min((linebox.pos.x - aabbmax.x) / vel.x, times[1]);
+            }
+            else if (vel.x > 0) //Sweeping right
+            {
+                if (pos.x > lineMax.x)
+                    return Intersection<T>();
+                times[0] = std::max((linebox.pos.x - aabbmax.x) / vel.x, times[0]);
+                times[1] = std::min((lineMax.x - pos.x) / vel.x, times[1]);
+            }
+            else
+            {
+                if (linebox.pos.x > aabbmax.x || lineMax.x < pos.x)
+                    return Intersection<T>();
+            }
+
+            if (times[0] > times[1])
+                return Intersection<T>();
+
+            // Y axis overlap
+            if (vel.y < 0) //Sweeping down
+            {
+                if (aabbmax.y < linebox.pos.y)
+                    return Intersection<T>();
+                times[0] = std::max((lineMax.y - pos.y) / vel.y, times[0]);
+                times[1] = std::min((linebox.pos.y - aabbmax.y) / vel.y, times[1]);
+            }
+            else if (vel.y > 0) //Sweeping up
+            {
+                if (pos.y > lineMax.y)
+                    return Intersection<T>();
+                times[0] = std::max((linebox.pos.y - aabbmax.y) / vel.y, times[0]);
+                times[1] = std::min((lineMax.y - pos.y) / vel.y, times[1]);
+            }
+            else
+            {
+                if (linebox.pos.y > aabbmax.y || lineMax.y < pos.y)
+                    return Intersection<T>();
+            }
+        }
+
+        if (times[0] > times[1])
+            return Intersection<T>();
+
+        return Intersection<T>((center + vel * times[0]).asPoint(), times, -ln);
+    }
 
     template <class T>
     bool AABB<T>::operator!=(const AABB<T>& r) const

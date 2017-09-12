@@ -11,6 +11,10 @@ if(CPPMATH_BUILD_GRAPHICAL_TEST)
     add_executable(graphical_test graphical.cpp)
     target_link_libraries(graphical_test sfml-graphics sfml-window sfml-system)
     set_property(TARGET graphical_test PROPERTY CXX_STANDARD 11)
+
+    add_executable(sweep_graphical_test sweepgraphical.cpp)
+    target_link_libraries(sweep_graphical_test sfml-graphics sfml-window sfml-system)
+    set_property(TARGET sweep_graphical_test PROPERTY CXX_STANDARD 11)
 endif()
 
 if(CPPMATH_BUILD_TESTS)
