@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include "AABB.hpp"
+#include "Polygon.hpp"
 #include "../math.hpp"
 
 namespace math

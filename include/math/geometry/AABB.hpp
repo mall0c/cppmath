@@ -2,11 +2,13 @@
 #define CPPMATH_AABB_HPP
 
 #include "Vector.hpp"
-#include "Polygon.hpp"
 #include "Intersection.hpp"
 
 namespace math
 {
+    template <class T>
+    class Polygon;
+
     template <class T>
     class AABB
     {
