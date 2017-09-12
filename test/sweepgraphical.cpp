@@ -52,6 +52,11 @@ int main(int argc, char *argv[])
     shapes[3].type = Line;
     // create(shapes);
 
+    // Polygon<float> pol(LineStrip);
+    // for (int i = 0; i < 4; ++i)
+    //     pol.add(shapes[i].p);
+    // pol.add(shapes[0].p);
+
     sf::Event ev;
     while (window.isOpen())
     {
@@ -154,9 +159,17 @@ int main(int argc, char *argv[])
                 drawLine(window, line.p, line.p + line.d);
 
             auto isec = aabb.sweep(speed, line);
+            // if (nearest && isec && std::abs(isec.time - nearest.time) < 0.01)
+            // {
+            //     cout<<"isec.time: "<<isec.time<<endl;
+            //     cout<<"nearest.time: "<<nearest.time<<endl;
+            //     cout<<"--------------"<<endl;
+            // }
             if (!nearest || (isec && isec.time < nearest.time))
                 nearest = isec;
         }
+
+        // nearest = aabb.sweep(speed, pol);
 
         if (nearest)
         {

@@ -131,8 +131,17 @@ namespace math
         Intersection<T> nearest;
         pol.foreachSegment([&](const Line2<T>& seg) {
                 auto isec = sweep(vel, seg);
-                if (!nearest || (isec && isec.time < nearest.time))
-                    nearest = isec;
+                if (isec)
+                {
+                    if (nearest && std::abs(isec.time - nearest.time) < 0.01)
+                    {
+                        nearest.p = isec.p;
+                        nearest.times = isec.times;
+                        nearest.normal = (nearest.normal + isec.normal).normalized();
+                    }
+                    else if (!nearest || isec.time < nearest.time)
+                        nearest = isec;
+                }
                 return false;
             });
         return nearest;
