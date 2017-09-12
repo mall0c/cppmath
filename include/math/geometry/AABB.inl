@@ -119,7 +119,9 @@ namespace math
     Intersection<T> AABB<T>::sweep(const Vec2<T>& vel, AABB<T> box) const
     {
         box.extend(*this);
-        return Line2<T>(getCenter().asPoint(), vel, Segment).intersect(box);
+        auto isec = Line2<T>(getCenter().asPoint(), vel, Segment).intersect(box);
+        isec.type = SweptAABBxAABB;
+        return isec;
     }
 
     template <class T>
@@ -217,7 +219,9 @@ namespace math
         if (times[0] > times[1])
             return Intersection<T>();
 
-        return Intersection<T>((center + vel * times[0]).asPoint(), times, -ln);
+         Intersection<T> isec((center + vel * times[0]).asPoint(), times, -ln);
+         isec.type = SweptAABBxLine;
+         return isec;
     }
 
     template <class T>

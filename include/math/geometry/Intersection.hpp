@@ -12,7 +12,9 @@ namespace math
         None,
         LinexLine,
         LinexAABB,
-        AABBxAABB
+        AABBxAABB,
+        SweptAABBxAABB,
+        SweptAABBxLine
     };
 
     template <class T>
@@ -26,11 +28,11 @@ namespace math
             Intersection(const Vec2<T>& d, const Vec2<T>& normal_) :
                 type(AABBxAABB), normal(normal_), delta(d) {}
 
-            // Line vs Line
+            // Line vs Line / Swept AABB vs Line
             Intersection(const Point2<T>& p_, const Vec2<T>& times_, const Vec2<T>& normal_) :
                 type(LinexLine), normal(normal_), times(times_), p(p_) {}
 
-            // Line vs AABB
+            // Line vs AABB / Swept AABB vs AABB
             Intersection(const Point2<T>& p1, const Point2<T>& p2, const Vec2<T>& times_, const Vec2<T>& normal_) :
                 type(LinexAABB), normal(normal_), times(times_), seg(p1, p2, Segment) {}
 
