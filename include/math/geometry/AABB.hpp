@@ -17,20 +17,21 @@ namespace math
             AABB(const AABB<T>& rect) = default;
 
         public:
-            void combine(const AABB<T>& other);
-            void extend(const AABB<T>& other, bool center = true);
+            auto combine(const AABB<T>& other)                    -> void;
+            auto extend(const AABB<T>& other, bool center = true) -> void;
 
-            bool isEmpty() const;
+            auto isEmpty() const -> bool;
 
-            void center(T x, T y);
-            void center(const Point2<T>& p);
+            auto center(T x, T y)           -> void;
+            auto center(const Point2<T>& p) -> void;
+            auto getCenter() const          -> Vec2<T>;
 
-            bool contains(const Point2<T>& point) const;
-            bool contains(const AABB<T>& rect) const;
-            Intersection<T> intersect(const AABB<T>& rect) const;
+            auto contains(const Point2<T>& point) const                -> bool;
+            auto contains(const AABB<T>& rect) const                   -> bool;
+            auto intersect(const AABB<T>& rect) const                  -> Intersection<T>;
 
-            bool operator!=(const AABB<T>& r) const;
-            bool operator==(const AABB<T>& r) const;
+            auto operator!=(const AABB<T>& r) const -> bool;
+            auto operator==(const AABB<T>& r) const -> bool;
 
             template <class T2>
             operator AABB<T2>() const;

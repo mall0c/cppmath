@@ -148,6 +148,23 @@ namespace math
     }
 
     template <class T>
+    AABB<T> Line2<T>::getBBox() const
+    {
+        AABB<T> box(p.asVector(), d);
+        if (d.x < 0)
+        {
+            box.x += d.x;
+            box.w = -box.w;
+        }
+        if (d.y < 0)
+        {
+            box.y += d.y;
+            box.h = -box.h;
+        }
+        return box;
+    }
+
+    template <class T>
     inline bool Line2<T>::_checkScale(double u) const
     {
         if (type == Ray)

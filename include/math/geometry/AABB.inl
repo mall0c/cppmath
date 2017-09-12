@@ -68,6 +68,7 @@ namespace math
     void AABB<T>::center(T x, T y)
     {
         pos.fill(x, y);
+        pos -= size / 2;
     }
 
     template <class T>
@@ -76,6 +77,11 @@ namespace math
         center(p.x, p.y);
     }
 
+    template <class T>
+    Vec2<T> AABB<T>::getCenter() const
+    {
+        return pos + size / 2;
+    }
 
     template <class T>
     bool AABB<T>::contains(const Point2<T>& point) const
