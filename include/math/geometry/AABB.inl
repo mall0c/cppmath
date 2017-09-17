@@ -229,7 +229,8 @@ namespace math
         if (times[0] > times[1])
             return Intersection<T>();
 
-         Intersection<T> isec((center + vel * times[0]).asPoint(), times, -ln);
+         // Intersection<T> isec((center + vel * times[0]).asPoint(), times, -ln);
+         Intersection<T> isec((pos + vel * times[0]).asPoint(), times, -ln);
          isec.type = SweptAABBxLine;
          return isec;
     }

@@ -173,14 +173,15 @@ int main(int argc, char *argv[])
 
         if (nearest)
         {
-            if (nearest.time < 0)
-                drawRect(window, aabb, sf::Color::Red);
+            // if (nearest.time < 0)
+            //     drawRect(window, aabb, sf::Color::Red);
+            auto center = nearest.p + aabb.size / 2;
             AABBT col(aabb);
-            col.pos = nearest.p.asVector() - aabb.size / 2;
+            col.pos = nearest.p.asVector();
             drawRect(window, col, sf::Color::Magenta);
-            drawPoint(window, nearest.p);
+            drawPoint(window, center);
             // drawPoint(window, pos + speed * nearest.times[1]);
-            drawLine(window, nearest.p, nearest.p + nearest.normal * 10, sf::Color::Green);
+            drawLine(window, center, center + nearest.normal * 10, sf::Color::Green);
         }
         else
         {
