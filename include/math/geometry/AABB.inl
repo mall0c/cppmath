@@ -121,7 +121,8 @@ namespace math
     {
         box.extend(*this);
         auto isec = Line2<T>(getCenter().asPoint(), vel, Segment).intersect(box);
-        isec.type = SweptAABBxAABB;
+        if (isec)
+            isec.type = SweptAABBxAABB;
         return isec;
     }
 
