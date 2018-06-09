@@ -92,6 +92,12 @@ namespace math
     }
 
     template <class T>
+    bool AABB<T>::intersect(const Point2<T>& point) const
+    {
+        return contains(point);
+    }
+
+    template <class T>
     bool AABB<T>::contains(const AABB<T>& rect) const
     {
         return contains(rect.pos) && contains(rect.pos + rect.size);

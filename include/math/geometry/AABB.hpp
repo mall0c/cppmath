@@ -30,6 +30,7 @@ namespace math
             auto getCenter() const          -> Vec2<T>;
 
             auto contains(const Point2<T>& point) const                 -> bool;
+            auto intersect(const Point2<T>& point) const                -> bool;
             auto contains(const AABB<T>& rect) const                    -> bool;
             auto intersect(const AABB<T>& rect) const                   -> Intersection<T>;
             auto sweep(const Vec2<T>& vel, const Line2<T>& line) const  -> Intersection<T>;
