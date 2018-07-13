@@ -107,14 +107,16 @@ namespace math
     Intersection<T> AABB<T>::intersect(const AABB<T>& other) const
     {
         // Adapted from http://noonat.github.io/intersect/#aabb-vs-aabb
-        T dx = (other.pos.x + other.size.x / 2) - (pos.x + size.x / 2);
+        auto center = getCenter();
+        auto othercenter = other.getCenter();
+        T dx = othercenter.x - center.x;
         T px = (other.size.x / 2 + size.x / 2) - std::abs(dx);
-        if (px <= 0)
+        if (px < 0)
             return Intersection<T>();
 
-        T dy = (other.pos.y + other.size.y / 2) - (pos.y + size.y / 2);
+        T dy = othercenter.y - center.y;
         T py = (other.size.y / 2 + size.y / 2) - std::abs(dy);
-        if (py <= 0)
+        if (py < 0)
             return Intersection<T>();
 
         return Intersection<T>(
@@ -139,16 +141,8 @@ namespace math
         pol.foreachSegment([&](const Line2<T>& seg) {
                 auto isec = sweep(vel, seg);
                 if (isec)
-                {
-                    if (nearest && std::abs(isec.time - nearest.time) < 0.01)
-                    {
-                        nearest.p = isec.p;
-                        nearest.times = isec.times;
-                        nearest.normal = (nearest.normal + isec.normal).normalized();
-                    }
-                    else if (!nearest || isec.time < nearest.time)
+                    if (!nearest || std::abs(isec.time) < std::abs(nearest.time))
                         nearest = isec;
-                }
                 return false;
             });
         return nearest;
