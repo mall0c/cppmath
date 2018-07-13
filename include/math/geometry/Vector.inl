@@ -58,7 +58,7 @@ namespace math
     template <typename F>
     void Vector<T, N>::foreach(F callback)
     {
-        _FOREACH_VECTOR(i, callback(_data + i);)
+        _FOREACH_VECTOR(i, callback(_data + i, i);)
     }
 
     template <typename T, size_t N>
@@ -171,6 +171,12 @@ namespace math
             if (!math::almostEquals(_data[i], p[i], tolerance))
                 return false;
         )
+    }
+
+    template <typename T, size_t N>
+    bool Vector<T, N>::isZero() const
+    {
+        return *this == type();
     }
 
     template <typename T, size_t N>

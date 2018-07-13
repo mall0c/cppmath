@@ -46,7 +46,7 @@ namespace math
 
         public:
             // Calls a callback for each element in the vector.
-            // The callback takes a pointer to the current element as argument.
+            // Signature: void(T* elem, size_t index)
             template <typename F>
             void foreach(F callback);
 
@@ -91,6 +91,8 @@ namespace math
 
             bool almostEquals(const type& rhs) const;
             bool almostEquals(const type& rhs, T tolerance) const;
+
+            bool isZero() const;
 
             // Specific to 3D and 7D vectors.
             template <size_t M = N, typename = typename std::enable_if<M == 3 || M == 7>::type>
