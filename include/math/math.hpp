@@ -51,6 +51,19 @@ namespace math
     {
         return std::max(min, std::min(val, max));
     }
+
+    template <typename T>
+    constexpr bool around(const T& val, const T& base, const T& rad)
+    {
+        return inrange(val, base - rad, base + rad);
+    }
+
+    template <typename T>
+    constexpr bool inrange(const T& val, const T& a, const T& b, bool incl = false)
+    {
+        return incl ? val >= std::min(a, b) && val <= std::max(a, b)
+                    : val > std::min(a, b) && val < std::max(a, b);
+    }
 }
 
 #endif
