@@ -195,6 +195,7 @@ namespace math
 
     typedef Vector<float, 2> Vec2f;
     typedef Vector<float, 3> Vec3f;
+    typedef Vector<float, 4> Vec4f;
     typedef Vector<double, 2> Vec2d;
     typedef Vector<double, 3> Vec3d;
     typedef Vector<int, 2> Vec2i;
@@ -205,6 +206,9 @@ namespace math
 
     template <typename T>
     using Vec3 = Vector<T, 3>;
+
+    template <typename T>
+    using Vec4 = Vector<T, 4>;
 }
 
 #include "Vector.inl"
