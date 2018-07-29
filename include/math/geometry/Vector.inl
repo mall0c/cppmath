@@ -5,6 +5,7 @@
 #include "Point2.hpp"
 
 #define _FOREACH_VECTOR(var, op) for (size_t (var) = 0; (var) < N; ++(var)) { op }
+#define __LIMITDIM_IMPL template <size_t M, typename>
 
 namespace math
 {
@@ -117,19 +118,47 @@ namespace math
         return dot(vec) / (abs() * vec.abs());
     }
 
-    template <typename T, size_t N>
-    template <size_t M, typename>
+    template <typename T, size_t N> __LIMITDIM_IMPL
     double Vector<T, N>::angle() const
     {
         return radtodeg(angle_rad());
     }
 
-    template <typename T, size_t N>
-    template <size_t M, typename>
+    template <typename T, size_t N> __LIMITDIM_IMPL
     double Vector<T, N>::angle_rad() const
     {
         return atan2(this->y, this->x);
     }
+
+    template <typename T, size_t N> __LIMITDIM_IMPL
+    void Vector<T, N>::rotate(float angle)
+    {
+        rotate_rad(degtorad(angle));
+    }
+
+    template <typename T, size_t N> __LIMITDIM_IMPL
+    void Vector<T, N>::rotate_rad(float rad)
+    {
+        fill(this->x * cos(rad) - this->y * sin(rad),
+             this->x * sin(rad) + this->y * cos(rad));
+    }
+
+    template <typename T, size_t N> __LIMITDIM_IMPL
+    Vector<T, N> Vector<T, N>::rotated(float angle) const
+    {
+        type v(*this);
+        v.rotate(angle);
+        return v;
+    }
+
+    template <typename T, size_t N> __LIMITDIM_IMPL
+    Vector<T, N> Vector<T, N>::rotated_rad(float rad) const
+    {
+        type v(*this);
+        v.rotate_rad(rad);
+        return v;
+    }
+
 
     template <typename T, size_t N>
     Vector<T, N> Vector<T, N>::signs() const
@@ -179,43 +208,43 @@ namespace math
         return *this == type();
     }
 
-    template <typename T, size_t N>
-    template <size_t M, typename>
+    template <typename T, size_t N> __LIMITDIM_IMPL
     const Point2<T>& Vector<T, N>::asPoint() const
     {
         return *reinterpret_cast<const Point2<T>*>(this);
     }
 
-    template <typename T, size_t N>
-    template <size_t M, typename>
+    template <typename T, size_t N> __LIMITDIM_IMPL
     Point2<T>& Vector<T, N>::asPoint()
     {
         return *reinterpret_cast<Point2<T>*>(this);
     }
 
-    template <typename T, size_t N>
-    template <size_t M, typename>
+    template <typename T, size_t N> __LIMITDIM_IMPL
     T Vector<T, N>::cross(const type& rhs) const
     {
         return rhs.y * this->x - rhs.x * this->y;
     }
 
-    template <typename T, size_t N>
-    template <size_t M, typename>
-    Vector<T, N> Vector<T, N>::ortho() const
+    template <typename T, size_t N> __LIMITDIM_IMPL
+    Vector<T, N> Vector<T, N>::left() const
+    {
+        return -right();
+    }
+
+    template <typename T, size_t N> __LIMITDIM_IMPL
+    Vector<T, N> Vector<T, N>::right() const
     {
         return type(-this->y, this->x);
     }
 
-    template <typename T, size_t N>
-    template <size_t M, typename>
+    template <typename T, size_t N> __LIMITDIM_IMPL
     bool Vector<T, N>::crossAlmostZero(const type& rhs) const
     {
         return math::almostEquals(rhs.y * this->x, rhs.x * this->y);
     }
 
-    template <typename T, size_t N>
-    template <size_t M, typename>
+    template <typename T, size_t N> __LIMITDIM_IMPL
     Vector<T, N> Vector<T, N>::cross(const type& rhs) const
     {
         type vec;
@@ -225,8 +254,7 @@ namespace math
         return vec;
     }
 
-    template <typename T, size_t N>
-    template <size_t M, typename>
+    template <typename T, size_t N> __LIMITDIM_IMPL
     Vector<T, N> Vector<T, N>::fromAngle(float len, float dir)
     {
         return type(len * cos(degtorad(dir)), len * sin(degtorad(dir)));

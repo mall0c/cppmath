@@ -5,6 +5,8 @@
 #include "../math.hpp"
 #include "../type_traits.hpp"
 
+#define __LIMITDIM(x) template <size_t M = N, typename = typename std::enable_if<M == (x)>::type> 
+
 // TODO: Create global functions for dot, signs, abs, ...
 
 namespace math
@@ -41,8 +43,7 @@ namespace math
             // Creates a vector of a given length in a given direction.
             // Specific to 2D vectors.
             // TODO: Write this for 3D
-            template <size_t M = N, typename = typename std::enable_if<M == 2>::type>
-            static type fromAngle(float length, float dir);
+            __LIMITDIM(2) static type fromAngle(float length, float dir);
 
         public:
             // Calls a callback for each element in the vector.
@@ -71,17 +72,6 @@ namespace math
             double angle_rad(const type& vec) const;
             double angle_cos(const type& vec) const;
 
-            // Returns the direction of the vector in degrees/radians/cosines.
-            // Specific to 2D vectors.
-            template <size_t M = N, typename = typename std::enable_if<M == 2>::type>
-            double angle() const;
-
-            template <size_t M = N, typename = typename std::enable_if<M == 2>::type>
-            double angle_rad() const;
-
-            template <size_t M = N, typename = typename std::enable_if<M == 2>::type>
-            double angle_cos() const;
-
             // Returns a vector with the elements' signs.
             type signs() const;
 
@@ -98,28 +88,33 @@ namespace math
             template <size_t M = N, typename = typename std::enable_if<M == 3 || M == 7>::type>
             type cross(const type& rhs) const;
 
-            // Specific to 2D vectors.
-            template <size_t M = N, typename = typename std::enable_if<M == 2>::type>
-            const Point2<T>& asPoint() const;
 
-            // Specific to 2D vectors.
-            template <size_t M = N, typename = typename std::enable_if<M == 2>::type>
-            Point2<T>& asPoint();
+        public:
+            // Functions specific to 2D
+            //
+            // Returns the direction of the vector in degrees/radians/cosines.
+            __LIMITDIM(2) double angle() const;
+            __LIMITDIM(2) double angle_rad() const;
+            __LIMITDIM(2) double angle_cos() const;
 
-            // Returns a vector perpendicular to this vector.
-            // Specific to 2D vectors.
-            template <size_t M = N, typename = typename std::enable_if<M == 2>::type>
-            type ortho() const;
+            // Rotate a vector by a certain angle
+            __LIMITDIM(2) void rotate(float angle);
+            __LIMITDIM(2) void rotate_rad(float rad);
+            __LIMITDIM(2) type rotated(float angle) const;
+            __LIMITDIM(2) type rotated_rad(float rad) const;
 
             // Returns the magnitude of the 3D cross product with z = 0.
-            // Specific to 2D vectors.
-            template <size_t M = N, typename = typename std::enable_if<M == 2>::type>
-            T cross(const type& rhs) const;
+            __LIMITDIM(2) T cross(const type& rhs) const;
 
             // Produces less rounding errors when checking the cross product for 0
-            // Specific to 2D vectors.
-            template <size_t M = N, typename = typename std::enable_if<M == 2>::type>
-            bool crossAlmostZero(const type& rhs) const;
+            __LIMITDIM(2) bool crossAlmostZero(const type& rhs) const;
+
+            // Returns a vector perpendicular to this vector.
+            __LIMITDIM(2) type left() const;
+            __LIMITDIM(2) type right() const;
+
+            __LIMITDIM(2) const Point2<T>& asPoint() const;
+            __LIMITDIM(2) Point2<T>& asPoint();
 
         public:
             template <typename T2>
