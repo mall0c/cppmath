@@ -16,8 +16,8 @@ namespace math
     class Polygon
     {
         public:
-            Polygon(PolygonType type = TriangleStrip);
-            Polygon(size_t size, PolygonType type = TriangleStrip);
+            Polygon(PolygonType type = TriangleStrip, NormalDirection ndir = NormalBoth);
+            Polygon(size_t size, PolygonType type = TriangleStrip, NormalDirection ndir = NormalBoth);
 
             // Add a new vertex
             auto add(const Point2<T>& point)    -> void;
@@ -42,11 +42,13 @@ namespace math
             template <typename F>
             auto foreachSegment(F callback) const -> void;
 
-            auto intersect(const Line2<T>& line, bool convex, bool invert = false) const   -> Intersection<T>;
-            auto intersect(const Point2<T>& point, bool convex, bool invert = false) const -> bool;
+            auto intersect(const Line2<T>& line, bool convex = false, bool invert = false) const   -> Intersection<T>;
+            auto intersect(const Point2<T>& point, bool convex = false, bool invert = false) const -> bool;
 
-            auto intersect(const Line2<T>& line) const   -> Intersection<T>;
-            auto intersect(const Point2<T>& point) const -> bool;
+            // Returns nearest intersection
+            // Basically the same as intersect(), but without early-out checks.
+            // Is used internally by intersect().
+            auto findNearest(const Line2<T>& line) const -> Intersection<T>;
 
             auto setOffset(const Vec2<T>& off)  -> void;
             auto getOffset() const              -> const Vec2<T>&;
@@ -64,6 +66,7 @@ namespace math
 
         public:
             PolygonType type;
+            NormalDirection normaldir;
 
         protected:
             // Recalculate the bounding box
@@ -78,6 +81,7 @@ namespace math
             AABB<T> _bbox;
             std::vector<Point2<T>> _points;
     };
+
 }
 
 #include "Polygon.inl"

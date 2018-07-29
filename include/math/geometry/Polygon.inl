@@ -9,14 +9,16 @@
 namespace math
 {
     template <typename T>
-    Polygon<T>::Polygon(PolygonType type_) :
+    Polygon<T>::Polygon(PolygonType type_, NormalDirection ndir) :
         type(type_),
+        normaldir(ndir),
         _scale(1, 1)
     { }
 
     template <typename T>
-    Polygon<T>::Polygon(size_t size, PolygonType type_) :
+    Polygon<T>::Polygon(size_t size, PolygonType type_, NormalDirection ndir) :
         type(type_),
+        normaldir(ndir),
         _scale(1, 1)
     {
         _points.reserve(size);
@@ -97,18 +99,6 @@ namespace math
     }
 
     template <typename T>
-    Intersection<T> Polygon<T>::intersect(const Line2<T>& line) const
-    {
-        return intersect(line, false, false);
-    }
-
-    template <typename T>
-    bool Polygon<T>::intersect(const Point2<T>& point) const
-    {
-        return intersect(point, false, false);
-    }
-
-    template <typename T>
     Intersection<T> Polygon<T>::intersect(const Line2<T>& line, bool convex, bool invert) const
     {
         switch (type)
@@ -137,6 +127,23 @@ namespace math
         }
         return false;
     }
+
+    template <typename T>
+    Intersection<T> Polygon<T>::findNearest(const Line2<T>& line) const
+    {
+        Intersection<T> nearest;
+
+        auto cb = [&](const Line2<T>& seg) {
+            auto isec = line.intersect(seg, normaldir);
+            if (!nearest || (isec && isec.time < nearest.time))
+                nearest = isec;
+            return false;
+        };
+
+        foreachSegment(cb);
+        return nearest;
+    }
+
 
     template <typename T>
     Point2<T>& Polygon<T>::_getRaw(int i)

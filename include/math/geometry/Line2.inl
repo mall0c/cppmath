@@ -35,7 +35,7 @@ namespace math
     }
 
     template <class T>
-    Intersection<T> Line2<T>::intersect(const Line2<T>& line) const
+    Intersection<T> Line2<T>::intersect(const Line2<T>& line, NormalDirection ndir) const
     {
         if (d.crossAlmostZero(line.d)) // parallel
             return Intersection<T>();
@@ -50,9 +50,14 @@ namespace math
             return Intersection<T>();
 
 
-        // Make the normal always face the current line
-        Vec2<T> normal(line.d.y * sign(m), -line.d.x * sign(m));
-        normal.normalize();
+        // NOTE: if changing something related to normal directions, remember to change it in AABB vs Line sweep
+        Vec2<T> normal = line.d.normalized();
+        if (ndir == NormalLeft)
+            normal = normal.left();
+        else if (ndir == NormalRight)
+            normal = normal.right();
+        else
+            normal = normal.right() * sign(m);
         return Intersection<T>(p + d * u, Vec2<T>(u, v), normal);
     }
 

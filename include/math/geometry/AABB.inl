@@ -135,21 +135,32 @@ namespace math
     }
 
     template <class T>
-    Intersection<T> AABB<T>::sweep(const Vec2<T>& vel, const Polygon<T>& pol) const
+    Intersection<T> AABB<T>::sweep(const Vec2<T>& vel, const Polygon<T>& pol, bool avgCorners) const
     {
+        // TODO: consider adding a bool that skips the normal check
+
         Intersection<T> nearest;
-        pol.foreachSegment([&](const Line2<T>& seg) {
-                auto isec = sweep(vel, seg);
-                if (isec)
-                    if (!nearest || std::abs(isec.time) < std::abs(nearest.time))
-                        nearest = isec;
-                return false;
-            });
+        auto cb = [&](const Line2<T>& seg) {
+            auto isec = sweep(vel, seg, pol.normaldir);
+            if (isec && isec.normal.dot(vel) <= 0)
+            {
+                if (avgCorners && nearest && std::abs(isec.time - nearest.time) < 0.01)
+                {
+                    nearest.p = (isec.time < nearest.time) ? isec.p : nearest.p;
+                    nearest.time = std::min(nearest.time, isec.time);
+                    nearest.normal = (nearest.normal + isec.normal) / 2;
+                }
+                else if (!nearest || isec.time < nearest.time)
+                    nearest = isec;
+            }
+            return false;
+        };
+        pol.foreachSegment(cb);
         return nearest;
     }
 
     template <class T>
-    Intersection<T> AABB<T>::sweep(const Vec2<T>& vel, const Line2<T>& line) const
+    Intersection<T> AABB<T>::sweep(const Vec2<T>& vel, const Line2<T>& line, NormalDirection ndir) const
     {
         // Based on https://gamedev.stackexchange.com/questions/29479/swept-aabb-vs-line-segment-2d
         // Praise OP
@@ -157,16 +168,12 @@ namespace math
         // TODO: support rays
         assert(line.type != Ray && "Rays are not supported yet");
 
+        auto nd = line.d.normalized(); // normalized line direction
         auto half = size / 2;
-        auto center = pos + half;
-        auto ln = line.d.ortho().normalized(); // line normal
-        auto dist = ln.dot(line.p.asVector() - center);
-
-        if (dist < 0)
-            ln *= -1;
-
+        auto dist = nd.left().dot(line.p.asVector() - getCenter());
+        auto ln = dist < 0 ? nd.right() : nd.left();
         dist = std::abs(dist);
-        auto r = half.x * std::abs(ln.x) + half.y * std::abs(ln.y);
+        auto r = half.dot(abs(ln));
         auto velproj = ln.dot(vel);
 
         if (velproj < 0)
@@ -176,7 +183,8 @@ namespace math
                       std::min((dist + r) / velproj, 1.0f));
 
         if (line.type == Segment)
-        { // AABB vs AABB sweep
+        {
+            // AABB vs AABB sweep
             AABB<T> linebox = line.getBBox();
             Vec2<T> aabbmax = pos + size;
             Vec2<T> lineMax = linebox.pos + linebox.size;
@@ -230,10 +238,18 @@ namespace math
         if (times[0] > times[1])
             return Intersection<T>();
 
-         // Intersection<T> isec((center + vel * times[0]).asPoint(), times, -ln);
-         Intersection<T> isec((pos + vel * times[0]).asPoint(), times, -ln);
-         isec.type = SweptAABBxLine;
-         return isec;
+
+        // NOTE: if changing something related to normal directions, remember to change it in Line vs Line
+        if (ndir == NormalLeft)
+            ln = nd.left();
+        else if (ndir == NormalRight)
+            ln = nd.right();
+        else
+            ln = -ln;
+
+        Intersection<T> isec((pos + vel * times[0]).asPoint(), times, ln);
+        isec.type = SweptAABBxLine;
+        return isec;
     }
 
     template <class T>

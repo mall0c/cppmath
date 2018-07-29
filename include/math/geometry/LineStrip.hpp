@@ -25,17 +25,7 @@ namespace math
         if (!line.intersect(polygon.getBBox()))
             return Intersection<T>();
 
-        Intersection<T> nearest;
-
-        foreachSegmentLineStrip(polygon, [&](const Line2<T>& seg)
-        {
-            auto isec = line.intersect(seg);
-            if (!nearest || (isec && isec.time < nearest.time))
-                nearest = isec;
-            return false;
-        });
-
-        return nearest;
+        return polygon.findNearest(line);
     }
 
     template <typename T>

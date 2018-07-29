@@ -24,11 +24,18 @@ namespace math
     template <class T>
     class AABB;
 
-    enum LineType : char
+    enum LineType
     {
         Line,
         Ray,
         Segment
+    };
+
+    enum NormalDirection
+    {
+        NormalBoth,
+        NormalLeft,
+        NormalRight
     };
 
     template <class T>
@@ -44,7 +51,7 @@ namespace math
 
             auto distance(const Point2<T>& point) const -> T;
 
-            auto intersect(const Line2<T>& line) const -> Intersection<T>;
+            auto intersect(const Line2<T>& line, NormalDirection ndir = NormalBoth) const -> Intersection<T>;
             auto intersect(const Point2<T>& p2) const  -> bool;
             auto intersect(const AABB<T>& box) const   -> Intersection<T>;
 

@@ -46,17 +46,7 @@ namespace math
         if (line.type != Line && intersectTriangleStrip(polygon, line.p, convex, invert))
             return Intersection<T>(line.p, Vec2f(), Vec2f());
 
-        Intersection<T> nearest;
-
-        foreachSegmentTriangleStrip(polygon, [&](const Line2<T>& seg)
-        {
-            auto isec = line.intersect(seg);
-            if (!nearest || (isec && isec.time < nearest.time))
-                nearest = isec;
-            return false;
-        });
-
-        return nearest;
+        return polygon.findNearest(line);
     }
 
     template <typename T>
