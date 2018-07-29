@@ -233,11 +233,13 @@ namespace math
                 if (linebox.pos.y > aabbmax.y || lineMax.y < pos.y)
                     return Intersection<T>();
             }
+
+            if (times[0] < 0 || times[1] > 1)
+                return Intersection<T>();
         }
 
         if (times[0] > times[1])
             return Intersection<T>();
-
 
         // NOTE: if changing something related to normal directions, remember to change it in Line vs Line
         if (ndir == NormalLeft)

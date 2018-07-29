@@ -52,10 +52,11 @@ int main(int argc, char *argv[])
     shapes[3].type = Line;
     // create(shapes);
 
-    // Polygon<float> pol(LineStrip);
-    // for (int i = 0; i < 4; ++i)
-    //     pol.add(shapes[i].p);
-    // pol.add(shapes[0].p);
+    Polygon<float> pol(LineStrip, NormalLeft);
+    for (int i = 0; i < 4; ++i)
+        pol.add(shapes[i].p);
+    pol.add(shapes[0].p);
+    pol.move(VecT(100, 0));
 
     sf::Event ev;
     while (window.isOpen())
@@ -169,7 +170,14 @@ int main(int argc, char *argv[])
                 nearest = isec;
         }
 
-        // nearest = aabb.sweep(speed, pol);
+        pol.foreachSegment([&](const LineT& seg) {
+            drawLine(window, seg.p, seg.p + seg.d);
+            return false;
+        });
+
+        auto isec = aabb.sweep(speed, pol);
+        if (!nearest || (isec && isec.time < nearest.time))
+            nearest = isec;
 
         if (nearest)
         {
@@ -178,7 +186,7 @@ int main(int argc, char *argv[])
             auto center = nearest.p + aabb.size / 2;
             AABBT col(aabb);
             col.pos = nearest.p.asVector();
-            drawRect(window, col, sf::Color::Magenta);
+            drawRect(window, col, sf::Color::Red);
             drawPoint(window, center);
             // drawPoint(window, pos + speed * nearest.times[1]);
             drawLine(window, center, center + nearest.normal * 10, sf::Color::Green);
