@@ -14,13 +14,13 @@ namespace math
         if (polygon.size() < 3)
             return;
 
-        if (callback(polygon.getSegment(0, 1)))
+        if (callback(polygon.getSegment(1, 0)))
             return;
         if (callback(polygon.getSegment(-2, -1)))
             return;
 
         for (size_t i = 3; i < polygon.size(); i += 2)
-            if (callback(polygon.getSegment(i - 2, i)))
+            if (callback(polygon.getSegment(i, i - 2)))
                 return;
 
         for (size_t i = 2; i < polygon.size(); i += 2)
