@@ -139,6 +139,9 @@ namespace math
     {
         // TODO: consider adding a bool that skips the normal check
 
+        if (!sweep(vel, pol.getBBox()))
+            return Intersection<T>();
+
         Intersection<T> nearest;
         auto cb = [&](const Line2<T>& seg) {
             auto isec = sweep(vel, seg, pol.normaldir);
