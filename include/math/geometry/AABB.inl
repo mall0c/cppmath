@@ -151,7 +151,8 @@ namespace math
                 {
                     nearest.p = (isec.time < nearest.time) ? isec.p : nearest.p;
                     nearest.time = std::min(nearest.time, isec.time);
-                    nearest.normal = (nearest.normal + isec.normal) / 2;
+                    // nearest.normal = (nearest.normal + isec.normal) / 2;
+                    nearest.normal = (nearest.normal + isec.normal).normalized();
                 }
                 else if (!nearest || isec.time < nearest.time)
                     nearest = isec;
