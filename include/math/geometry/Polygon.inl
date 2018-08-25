@@ -76,22 +76,22 @@ namespace math
     }
 
     template <typename T>
-    Line2<T> Polygon<T>::getSegment(int i, int j) const
+    Line2<T> Polygon<T>::getSegment(int i, int j, bool raw) const
     {
-        return Line2<T>(get(i), get(j), Segment);
+        return Line2<T>(raw ? getRaw(i) : get(i), raw ? getRaw(j) : get(j), Segment);
     }
 
     template <typename T>
     template <typename F>
-    void Polygon<T>::foreachSegment(F callback) const
+    void Polygon<T>::foreachSegment(F callback, bool raw) const
     {
         switch (type)
         {
             case LineStrip:
-                foreachSegmentLineStrip(*this, callback);
+                foreachSegmentLineStrip(*this, callback, raw);
                 break;
             case TriangleStrip:
-                foreachSegmentTriangleStrip(*this, callback);
+                foreachSegmentTriangleStrip(*this, callback, raw);
                 break;
             default:
                 assert(false && "currently not supported");

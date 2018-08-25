@@ -35,12 +35,12 @@ namespace math
 
             // Return a line segment from point i to point j.
             // Negative indices wrap around the end, e.g. -1 -> size() - 1
-            auto getSegment(int i, int j) const -> Line2<T>;
+            auto getSegment(int i, int j, bool raw = false) const -> Line2<T>;
 
             // Callback signature: (const Line2<T>&) -> bool
             // Returning true breaks the loop.
             template <typename F>
-            auto foreachSegment(F callback) const -> void;
+            auto foreachSegment(F callback, bool raw = false) const -> void;
 
             auto intersect(const Line2<T>& line, bool convex = false, bool invert = false) const   -> Intersection<T>;
             auto intersect(const Point2<T>& point, bool convex = false, bool invert = false) const -> bool;

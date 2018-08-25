@@ -9,22 +9,22 @@ namespace math
     // Callback signature: (const Line2<T>&) -> bool
     // Returning true breaks the loop.
     template <typename T, typename F>
-    auto foreachSegmentTriangleStrip(const Polygon<T>& polygon, F callback) -> void
+    auto foreachSegmentTriangleStrip(const Polygon<T>& polygon, F callback, bool raw) -> void
     {
         if (polygon.size() < 3)
             return;
 
-        if (callback(polygon.getSegment(1, 0)))
+        if (callback(polygon.getSegment(1, 0, raw)))
             return;
-        if (callback(polygon.getSegment(-2, -1)))
+        if (callback(polygon.getSegment(-2, -1, raw)))
             return;
 
         for (size_t i = 3; i < polygon.size(); i += 2)
-            if (callback(polygon.getSegment(i, i - 2)))
+            if (callback(polygon.getSegment(i, i - 2, raw)))
                 return;
 
         for (size_t i = 2; i < polygon.size(); i += 2)
-            if (callback(polygon.getSegment(i - 2, i)))
+            if (callback(polygon.getSegment(i - 2, i, raw)))
                 return;
     }
 
@@ -66,7 +66,7 @@ namespace math
             if (ray.intersect(line))
                 ++num;
             return convex ? num == 2 : false;
-        });
+        }, false);
 
         return num % 2 == (invert ? 0 : 1);
     }

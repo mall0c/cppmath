@@ -9,10 +9,10 @@ namespace math
     // Callback signature: (const Line2<T>&) -> bool
     // Returning true breaks the loop.
     template <typename T, typename F>
-    auto foreachSegmentLineStrip(const Polygon<T>& polygon, F callback) -> void
+    auto foreachSegmentLineStrip(const Polygon<T>& polygon, F callback, bool raw) -> void
     {
         for (size_t i = 1; i < polygon.size(); ++i)
-            if (callback(polygon.getSegment(i - 1, i)))
+            if (callback(polygon.getSegment(i - 1, i, raw)))
                 return;
     }
 
