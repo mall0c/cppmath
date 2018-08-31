@@ -22,6 +22,7 @@ namespace math
         public:
             auto combine(const AABB<T>& other)                    -> void;
             auto extend(const AABB<T>& other, bool center = true) -> void;
+            auto extend(const Vec2<T>& size, bool center = true)  -> void;
 
             auto isEmpty() const -> bool;
 

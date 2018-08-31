@@ -55,9 +55,15 @@ namespace math
     template <class T>
     void AABB<T>::extend(const AABB<T>& other, bool center)
     {
+        extend(other.size, center);
+    }
+
+    template <class T>
+    void AABB<T>::extend(const Vec2<T>& othersize, bool center)
+    {
         if (center)
-            pos -= other.size / 2;
-        size += other.size;
+            pos -= othersize / 2.f;
+        size += othersize;
     }
 
     template <class T>
