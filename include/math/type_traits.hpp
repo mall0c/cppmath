@@ -20,21 +20,11 @@ namespace math
     template <typename T>
     constexpr T epsilon()
     {
-        return std::is_integral<T>::value ? 0 : T();
+        return std::is_integral<T>::value ? 0 :
+            std::is_same<T, float>() ? CPPMATH_FLOAT_TOLERANCE :
+            std::is_same<T, double>() ? CPPMATH_DOUBLE_TOLERANCE :
+            T();
     }
-
-    template <>
-    constexpr float epsilon()
-    {
-        return CPPMATH_FLOAT_TOLERANCE;
-    }
-
-    template <>
-    constexpr double epsilon()
-    {
-        return CPPMATH_DOUBLE_TOLERANCE;
-    }
-
 
     // Adapted from http://floating-point-gui.de/errors/comparison/
     // template<typename T, typename U>
@@ -54,6 +44,12 @@ namespace math
 
         // Relative error
         return difference / (std::abs(a) + std::abs(b)) < tolerance;
+    }
+
+    template<typename T>
+    bool almostZero(const T& a, T tolerance = epsilon<T>())
+    {
+        return almostEquals(a, T(), tolerance);
     }
 }
 
