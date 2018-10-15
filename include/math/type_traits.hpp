@@ -16,15 +16,25 @@
 
 namespace math
 {
-    // Tolerance values for (floating point) comparison
     template <typename T>
     constexpr T epsilon()
     {
-        return std::is_integral<T>::value ? 0 :
-            std::is_same<T, float>() ? CPPMATH_FLOAT_TOLERANCE :
-            std::is_same<T, double>() ? CPPMATH_DOUBLE_TOLERANCE :
-            T();
+        static_assert(std::is_integral<T>::value, "Not an integral type");
+        return 0;
     }
+
+    template <>
+    constexpr float epsilon()
+    {
+        return CPPMATH_FLOAT_TOLERANCE;
+    }
+
+    template <>
+    constexpr double epsilon()
+    {
+        return CPPMATH_DOUBLE_TOLERANCE;
+    }
+
 
     // Adapted from http://floating-point-gui.de/errors/comparison/
     // template<typename T, typename U>
