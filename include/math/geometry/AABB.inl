@@ -141,7 +141,7 @@ namespace math
     }
 
     template <class T>
-    Intersection<T> AABB<T>::sweep(const Vec2<T>& vel, const Polygon<T>& pol, bool avgCorners) const
+    Intersection<T> AABB<T>::sweep(const Vec2<T>& vel, const BasePolygon<T>& pol, bool avgCorners) const
     {
         // TODO: consider adding a bool that skips the normal check
 

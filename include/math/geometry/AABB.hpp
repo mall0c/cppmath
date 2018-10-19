@@ -7,7 +7,7 @@
 namespace math
 {
     template <class T>
-    class Polygon;
+    class BasePolygon;
 
     template <class T>
     class AABB
@@ -36,7 +36,7 @@ namespace math
             auto intersect(const AABB<T>& rect) const         -> Intersection<T>;
 
             auto sweep(const Vec2<T>& vel, AABB<T> box) const -> Intersection<T>;
-            auto sweep(const Vec2<T>& vel, const Polygon<T>& pol, bool avgCorners = true) const -> Intersection<T>;
+            auto sweep(const Vec2<T>& vel, const BasePolygon<T>& pol, bool avgCorners = true) const -> Intersection<T>;
             auto sweep(const Vec2<T>& vel, const Line2<T>& line, NormalDirection ndir = NormalBoth) const -> Intersection<T>;
 
             auto operator!=(const AABB<T>& r) const -> bool;

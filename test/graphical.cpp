@@ -1,3 +1,8 @@
+// TODO:
+// This testcode is a disaster and needs to be cleaned up if not rewritten.
+// For some reason it sometimes works fine and sometimes don't.
+// A proper rewrite without union hell will probably fix it.
+
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include "math/geometry/Line2.hpp"
@@ -36,28 +41,30 @@ class Shape
         };
 
     public:
-        Shape() : invert(false), pol() {}
+        Shape() : invert(false) {}
         ~Shape();
         void render(sf::RenderTarget& target) const;
         void renderCollision(sf::RenderTarget& target, const Shape& shape) const;
 
+        void set(Shape::Shapes type);
+        void move(float x, float y);
+        void face(float x, float y);
+
     public:
         Shapes type;
         bool invert;
+        PolygonT pol;
 
         union {
             PointT p;
             VecT pos;
             LineT line;
             AABBT aabb;
-            PolygonT pol;
         };
 };
 
 
 void create(std::vector<Shape>& vec);
-void setCursor(Shape& cursor, Shape::Shapes type);
-void moveCursor(Shape& cursor, float x, float y);
 
 void drawRect(sf::RenderTarget& target, const AABBT& aabb, sf::Color col = sf::Color(131, 148, 150));
 void drawLine(sf::RenderTarget& target, const PointT& p1, const PointT& p2, sf::Color col = sf::Color(131, 148, 150));
@@ -75,7 +82,7 @@ int main(int argc, char *argv[])
     create(shapes);
 
     Shape& cursor = shapes[0];
-    setCursor(cursor, Shape::Line);
+    cursor.set(Shape::Line);
 
     sf::Event ev;
     while (window.isOpen())
@@ -89,6 +96,7 @@ int main(int argc, char *argv[])
             {
                 switch (ev.key.code)
                 {
+                    case sf::Keyboard::Escape:
                     case sf::Keyboard::Q:
                         window.close();
                         break;
@@ -98,19 +106,19 @@ int main(int argc, char *argv[])
                         break;
 
                     case sf::Keyboard::W:
-                        moveCursor(cursor, 0, -SPEED);
+                        cursor.move(0, -SPEED);
                         break;
 
                     case sf::Keyboard::S:
-                        moveCursor(cursor, 0, SPEED);
+                        cursor.move(0, SPEED);
                         break;
 
                     case sf::Keyboard::A:
-                        moveCursor(cursor, -SPEED, 0);
+                        cursor.move(-SPEED, 0);
                         break;
 
                     case sf::Keyboard::D:
-                        moveCursor(cursor, SPEED, 0);
+                        cursor.move(SPEED, 0);
                         break;
 
                     case sf::Keyboard::I:
@@ -130,27 +138,27 @@ int main(int argc, char *argv[])
                         break;
 
                     case sf::Keyboard::Num1:
-                        setCursor(cursor, Shape::Line);
+                        cursor.set(Shape::Line);
                         break;
 
                     case sf::Keyboard::Num2:
-                        setCursor(cursor, Shape::Ray);
+                        cursor.set(Shape::Ray);
                         break;
 
                     case sf::Keyboard::Num3:
-                        setCursor(cursor, Shape::Segment);
+                        cursor.set(Shape::Segment);
                         break;
 
                     case sf::Keyboard::Num4:
-                        setCursor(cursor, Shape::AABB);
+                        cursor.set(Shape::AABB);
                         break;
 
                     case sf::Keyboard::Num5:
-                        setCursor(cursor, Shape::Polygon);
+                        cursor.set(Shape::Polygon);
                         break;
 
                     case sf::Keyboard::Num6:
-                        setCursor(cursor, Shape::LineStrip);
+                        cursor.set(Shape::LineStrip);
                         break;
 
                     default:
@@ -184,11 +192,9 @@ int main(int argc, char *argv[])
                         break;
                 }
             }
-            else if (ev.type == sf::Event::MouseMoved &&
-                    cursor.type == Shape::Line)
+            else if (ev.type == sf::Event::MouseMoved)
             {
-                cursor.line.d.x = ev.mouseMove.x - cursor.line.p.x;
-                cursor.line.d.y = ev.mouseMove.y - cursor.line.p.y;
+                cursor.face(ev.mouseMove.x, ev.mouseMove.y);
             }
             else if (ev.type == sf::Event::MouseButtonPressed &&
                     (cursor.type == Shape::Polygon || cursor.type == Shape::LineStrip))
@@ -240,66 +246,76 @@ void create(std::vector<Shape>& vec)
     }
 }
 
-void setCursor(Shape& cursor, Shape::Shapes type)
+void Shape::face(float x, float y)
+{
+    if (type == Shape::Line)
+    {
+        line.d.x = x - line.p.x;
+        line.d.y = y - line.p.y;
+    }
+}
+
+void Shape::set(Shape::Shapes newtype)
 {
     // Positions should be all aligned at the same memory offset
     PointT old;
-    if (cursor.type == Shape::Polygon)
-        old = cursor.pol.getOffset().asPoint();
+    if (type == Shape::Polygon)
+        old = pol.getOffset().asPoint();
     else
-        old = cursor.p;
+        old = p;
 
-    if (type == Shape::Ray || type == Shape::Segment)
-        cursor.type = Shape::Line;
-    else if (type == Shape::LineStrip)
-        cursor.type = Shape::Polygon;
+    if (newtype == Shape::Ray || newtype == Shape::Segment)
+        type = Shape::Line;
+    else if (newtype == Shape::LineStrip)
+        type = Shape::Polygon;
     else
-        cursor.type = type;
+        type = newtype;
 
-    switch (type)
+    switch (newtype)
     {
         case Shape::Line:
-            cursor.line = LineT(old, VecT(1, 0));
+            line = LineT(old, VecT(1, 0));
             break;
 
         case Shape::Ray:
-            cursor.line = LineT(old, VecT(1, 0), Ray);
+            line = LineT(old, VecT(1, 0), LineType::Ray);
             break;
 
         case Shape::Segment:
-            cursor.line = LineT(old, VecT(100, 0), Segment);
+            line = LineT(old, VecT(100, 0), LineType::Segment);
             break;
 
         case Shape::AABB:
-            cursor.aabb = AABBT(old.x, old.y, 100, 70);
+            aabb = AABBT(old.x, old.y, 100, 70);
             break;
 
         case Shape::Polygon:
-            cursor.pol = PolygonT(5);
-            cursor.pol.setOffset(old.asVector());
+            pol.clear();
+            pol.type = PolygonType::TriangleStrip;
+            pol.setOffset(old.asVector());
             break;
 
         case Shape::LineStrip:
-            cursor.pol = PolygonT(5);
-            cursor.pol.type = LineStrip;
-            cursor.pol.setOffset(old.asVector());
+            pol.clear();
+            pol.type = PolygonType::LineStrip;
+            pol.setOffset(old.asVector());
             break;
     }
 }
 
-void moveCursor(Shape& cursor, float x, float y)
+void Shape::move(float x, float y)
 {
-    if (cursor.type == Shape::Polygon)
-        cursor.pol.move(VecT(x, y));
+    if (type == Shape::Polygon)
+        pol.move(VecT(x, y));
     else
-        cursor.pos += VecT(x, y);
+        pos += VecT(x, y);
 }
 
 Shape::~Shape()
 {
     // This needs to be destructed explicitely because it stores a std::vector
-    if (type == Polygon)
-        pol.~PolygonT();
+    // if (type == Polygon)
+    //     pol.~PolygonT();
 }
 
 void Shape::render(sf::RenderTarget& target) const

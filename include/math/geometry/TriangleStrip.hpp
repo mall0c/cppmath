@@ -9,7 +9,7 @@ namespace math
     // Callback signature: (const Line2<T>&) -> bool
     // Returning true breaks the loop.
     template <typename T, typename F>
-    auto foreachSegmentTriangleStrip(const Polygon<T>& polygon, F callback, bool raw) -> void
+    auto foreachSegmentTriangleStrip(const BasePolygon<T>& polygon, F callback, bool raw) -> void
     {
         if (polygon.size() < 3)
             return;
@@ -29,7 +29,7 @@ namespace math
     }
 
     template <typename T>
-    auto intersectTriangleStrip(const Polygon<T>& polygon, const Line2<T>& line, bool convex, bool invert = false) -> Intersection<T>
+    auto intersectTriangleStrip(const BasePolygon<T>& polygon, const Line2<T>& line, bool convex, bool invert = false) -> Intersection<T>
     {
         if (polygon.size() < 3)
             return Intersection<T>();
@@ -50,7 +50,7 @@ namespace math
     }
 
     template <typename T>
-    auto intersectTriangleStrip(const Polygon<T>& polygon, const Point2<T>& point, bool convex, bool invert = false) -> bool
+    auto intersectTriangleStrip(const BasePolygon<T>& polygon, const Point2<T>& point, bool convex, bool invert = false) -> bool
     {
         if (polygon.size() < 3)
             return false;
