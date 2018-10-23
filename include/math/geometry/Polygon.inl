@@ -34,6 +34,8 @@ namespace math
 
         if (!_bbox.contains(point))
             _recalculate();
+
+        _onVertexChanged();
     }
 
     template <typename T>
@@ -50,6 +52,7 @@ namespace math
         {
             pold = p;
             _recalculate();
+            _onVertexChanged();
         }
     }
 
@@ -58,6 +61,7 @@ namespace math
     {
         _points.clear();
         _recalculate();
+        _onVertexChanged();
     }
 
     template <typename T>

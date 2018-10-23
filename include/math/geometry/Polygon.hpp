@@ -62,6 +62,9 @@ namespace math
             NormalDirection normaldir;
 
         protected:
+            // Called whenever the vertix list changed
+            virtual auto _onVertexChanged() -> void {};
+
             // Recalculate the bounding box
             auto _recalculate() -> void;
 
