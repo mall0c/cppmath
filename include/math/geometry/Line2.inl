@@ -155,7 +155,7 @@ namespace math
     template <class T>
     AABB<T> Line2<T>::getBBox() const
     {
-        AABB<T> box(p.asVector(), d);
+        AABB<T> box(p, d);
         if (d.x < 0)
         {
             box.x += d.x;

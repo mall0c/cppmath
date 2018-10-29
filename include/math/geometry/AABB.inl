@@ -21,8 +21,8 @@ namespace math
     {};
 
     template <class T>
-    AABB<T>::AABB(const Vec2<T>& pos_, const Vec2<T>& size_) :
-        pos(pos_),
+    AABB<T>::AABB(const Point2<T>& pos_, const Vec2<T>& size_) :
+        pos(pos_.asVector()),
         size(size_)
     {};
 
