@@ -34,6 +34,16 @@ namespace math
     }
 
     template <class T>
+    AABB<T>::AABB(const Point2<T>& a, const Point2<T>& b) :
+        AABB(
+                std::min(a.x, b.x),
+                std::min(a.y, b.y),
+                std::abs(a.x - b.x),
+                std::abs(a.y - b.y)
+            )
+    { }
+
+    template <class T>
     void AABB<T>::combine(const AABB<T>& other)
     {
         if (isEmpty())

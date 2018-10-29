@@ -18,6 +18,7 @@ namespace math
             AABB(const Vec2<T>& pos_, const Vec2<T>& size_);
             AABB(const AABB<T>& a, const AABB<T>& b);
             AABB(const AABB<T>& rect) = default;
+            AABB(const Point2<T>& a, const Point2<T>& b);
 
         public:
             auto combine(const AABB<T>& other)                    -> void;
