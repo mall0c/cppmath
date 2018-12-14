@@ -475,4 +475,6 @@ namespace math
     }
 }
 
+#undef __LIMITDIM_IMPL
+
 #endif

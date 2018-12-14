@@ -125,4 +125,10 @@ namespace math
     }
 }
 
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const math::Point2<T>& vec)
+{
+    return operator<<(os, vec.asVector());
+}
+
 #endif

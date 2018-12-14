@@ -1,6 +1,7 @@
 #ifndef CPPMATH_VECTOR_HPP
 #define CPPMATH_VECTOR_HPP
 
+#include <ostream>
 #include "VectorData.hpp"
 #include "../math.hpp"
 #include "../type_traits.hpp"
@@ -206,6 +207,22 @@ namespace math
     using Vec4 = Vector<T, 4>;
 }
 
+
+template <typename T, size_t N>
+std::ostream& operator<<(std::ostream& os, const math::Vector<T, N>& vec)
+{
+    os << "(";
+    for (size_t i = 0; i < N; ++i)
+        if (i == N - 1)
+            os << vec[i];
+        else
+            os << vec[i] << ", ";
+    return os << ")";
+}
+
+
 #include "Vector.inl"
+
+#undef __LIMITDIM
 
 #endif
