@@ -1,4 +1,5 @@
 #include "math/math.hpp"
+#include "math/geometry/Vector.hpp"
 
 namespace math
 {
@@ -9,7 +10,7 @@ namespace math
 
     double pointDirection(double x1, double y1, double x2, double y2)
     {
-        return radtodeg(acos((x2 - x1) / pointDistance(x1, y1, x2, y2)));
+        return (Vec2d(x2, y2) - Vec2d(x1, y1)).angle();
     }
 
 
