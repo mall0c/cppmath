@@ -100,14 +100,14 @@ namespace math
     }
 
     template <typename T>
-    Intersection<T> BasePolygon<T>::intersect(const Line2<T>& line, bool convex, bool invert) const
+    Intersection<T> BasePolygon<T>::intersect(const Line2<T>& line, bool convex) const
     {
         switch (type)
         {
             case LineStrip:
                 return intersectLineStrip(*this, line);
             case TriangleStrip:
-                return intersectTriangleStrip(*this, line, convex, invert);
+                return intersectTriangleStrip(*this, line, convex);
             default:
                 assert(false && "currently not supported");
         }
@@ -115,14 +115,14 @@ namespace math
     }
 
     template <typename T>
-    bool BasePolygon<T>::intersect(const Point2<T>& point, bool convex, bool invert) const
+    bool BasePolygon<T>::intersect(const Point2<T>& point, bool convex) const
     {
         switch (type)
         {
             case LineStrip:
                 return intersectLineStrip(*this, point);
             case TriangleStrip:
-                return intersectTriangleStrip(*this, point, convex, invert);
+                return intersectTriangleStrip(*this, point, convex);
             default:
                 assert(false && "currently not supported");
         }

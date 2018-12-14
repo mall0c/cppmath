@@ -29,34 +29,28 @@ namespace math
     }
 
     template <typename T>
-    auto intersectTriangleStrip(const BasePolygon<T>& polygon, const Line2<T>& line, bool convex, bool invert = false) -> Intersection<T>
+    auto intersectTriangleStrip(const BasePolygon<T>& polygon, const Line2<T>& line, bool convex) -> Intersection<T>
     {
         if (polygon.size() < 3)
             return Intersection<T>();
 
         if (!line.intersect(polygon.getBBox()))
-        {
-            if (invert)
-                return Intersection<T>(line.p, Vec2f(), Vec2f());
-            else
-                return Intersection<T>();
-        }
+            return Intersection<T>();
 
-        // intersectTriangleStrip(point) already is invert dependent
-        if (line.type != Line && intersectTriangleStrip(polygon, line.p, convex, invert))
+        if (line.type != Line && intersectTriangleStrip(polygon, line.p, convex))
             return Intersection<T>(line.p, Vec2f(), Vec2f());
 
         return polygon.findNearest(line);
     }
 
     template <typename T>
-    auto intersectTriangleStrip(const BasePolygon<T>& polygon, const Point2<T>& point, bool convex, bool invert = false) -> bool
+    auto intersectTriangleStrip(const BasePolygon<T>& polygon, const Point2<T>& point, bool convex) -> bool
     {
         if (polygon.size() < 3)
             return false;
 
         if (!polygon.getBBox().contains(point))
-            return invert;
+            return false;
 
         Line2<T> ray(point, Vec2<T>(1, 0), Ray);
         size_t num = 0;
@@ -68,7 +62,7 @@ namespace math
             return convex ? num == 2 : false;
         }, false);
 
-        return num % 2 == (invert ? 0 : 1);
+        return num % 2 == 1;
     }
 }
 

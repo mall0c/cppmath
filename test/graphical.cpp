@@ -41,7 +41,7 @@ class Shape
         };
 
     public:
-        Shape() : invert(false) {}
+        Shape() {}
         ~Shape();
         void render(sf::RenderTarget& target) const;
         void renderCollision(sf::RenderTarget& target, const Shape& shape) const;
@@ -52,7 +52,6 @@ class Shape
 
     public:
         Shapes type;
-        bool invert;
         PolygonT pol;
 
         union {
@@ -119,10 +118,6 @@ int main(int argc, char *argv[])
 
                     case sf::Keyboard::D:
                         cursor.move(SPEED, 0);
-                        break;
-
-                    case sf::Keyboard::I:
-                        cursor.invert = !cursor.invert;
                         break;
 
                     case sf::Keyboard::Up:
@@ -365,7 +360,7 @@ void Shape::renderCollision(sf::RenderTarget& target, const Shape& shape) const
 
         case Polygon:
             if (shape.type == Line)
-                isec = pol.intersect(shape.line, false, invert);
+                isec = pol.intersect(shape.line, false);
             break;
     }
 

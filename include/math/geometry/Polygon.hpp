@@ -41,8 +41,8 @@ namespace math
             template <typename F>
             auto foreachSegment(F callback, bool raw = false) const -> void;
 
-            auto intersect(const Line2<T>& line, bool convex = false, bool invert = false) const   -> Intersection<T>;
-            auto intersect(const Point2<T>& point, bool convex = false, bool invert = false) const -> bool;
+            auto intersect(const Line2<T>& line, bool convex = false) const   -> Intersection<T>;
+            auto intersect(const Point2<T>& point, bool convex = false) const -> bool;
 
             // Returns nearest intersection
             // Basically the same as intersect(), but without early-out checks.
