@@ -18,6 +18,23 @@ namespace math
 
     double adaptDirection(double dir);
 
+    // modulo where negative values wrap around,
+    // e.g. -1 -> max - 1
+    //       1 -> 1
+    // adapted from here: https://stackoverflow.com/a/39740009
+    constexpr int wrap(int i, int mod, int min, int max)
+    {
+        return (mod >= 0) ?
+            (i + mod - min) % max + min
+            :
+            ((i + mod) + max * (-mod) - min) % max + min;
+    }
+
+    constexpr int wrap(int i, int mod)
+    {
+        return wrap(i, mod, 0, mod);
+    }
+
     template <typename T, typename T2>
     constexpr T snap(T x, T2 gridsize)
     {
@@ -47,7 +64,7 @@ namespace math
     }
 
     template <typename T>
-    T clamp(const T& val, const T& min, const T& max)
+    constexpr T clamp(const T& val, const T& min, const T& max)
     {
         return std::max(min, std::min(val, max));
     }
