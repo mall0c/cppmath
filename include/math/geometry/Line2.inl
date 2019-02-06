@@ -29,22 +29,36 @@ namespace math
     }
 
     template <class T>
-    T Line2<T>::distance(const Point2<T>& point) const
+    Point2<T> Line2<T>::closestPoint(const Point2<T>& point, bool clamp) const
     {
-        return d.normalized().dot(point.asVector());
+        auto lp = point - p;
+        double t = d.dot(lp) / d.abs_sqr();
+        if (clamp && type != Line)
+        {
+            if (type == math::Segment)
+                t = std::min(1.0, std::max(0.0, t));
+            else if (type == math::Ray)
+                t = std::max(0.0, t);
+        }
+        return p + d * t;
+    }
+
+    template <class T>
+    T Line2<T>::distance(const Point2<T>& point, bool clamp) const
+    {
+        return (point - closestPoint(point, clamp)).abs();
     }
 
     template <class T>
     Intersection<T> Line2<T>::intersect(const Line2<T>& line, NormalDirection ndir) const
     {
-        if (d.crossAlmostZero(line.d)) // parallel
+        if (isParallel(line))
             return Intersection<T>();
 
-        const T dx = line.p.x - p.x,
-                dy = line.p.y - p.y;
-        const double m = d.y * line.d.x - d.x * line.d.y,
-                     u = (line.d.x * dy - line.d.y * dx) / m,
-                     v = (d.x * dy - d.y * dx) / m;
+        const Vec2<T> dist = line.p - p;
+        const double m = line.d.cross(d),
+                     u = line.d.cross(dist) / m,
+                     v = d.cross(dist) / m;
 
         if (!_checkScale(u) || !line._checkScale(v))
             return Intersection<T>();
@@ -57,7 +71,7 @@ namespace math
         else if (ndir == NormalRight)
             normal = normal.right();
         else
-            normal = normal.right() * sign(m);
+            normal = normal.left() * sign(m);
         return Intersection<T>(p + d * u, Vec2<T>(u, v), normal);
     }
 
@@ -134,22 +148,7 @@ namespace math
     template <class T>
     bool Line2<T>::intersect(const Point2<T>& p2) const
     {
-        for (size_t i = 0; i < d.size(); ++i)
-        {
-            if (almostEquals(d[i], (T)0))
-            {
-                if (!almostEquals(p2[i], p[i]))
-                    return false;
-
-                size_t j = (i + 1) % 2;
-                return _checkScale((p2[j] - p[j]) / (double)d[j]);
-            }
-        }
-
-        auto v = (p2 - p) / (Vec2d)d;
-        if (!almostEquals(v.x, v.y))
-            return false;
-        return _checkScale(v.x);
+        return math::almostZero((p2 - closestPoint(p2, true)).abs_sqr());
     }
 
     template <class T>
