@@ -1,106 +1,263 @@
-#ifndef CPPMATH_POLYGON_HPP
-#define CPPMATH_POLYGON_HPP
+#ifndef CPPMATH_BASE_POINT_SET_HPP
+#define CPPMATH_BASE_POINT_SET_HPP
 
-#include <vector>
 #include "Line2.hpp"
 
 namespace math
 {
-    enum PolygonType
-    {
-        LineStrip,
-        TriangleStrip,
-    };
-
     template <typename T>
-    class BasePolygon
+    class AbstractPolygon
     {
         public:
-            BasePolygon(PolygonType type = TriangleStrip, NormalDirection ndir = NormalBoth);
-            BasePolygon(size_t size, PolygonType type = TriangleStrip, NormalDirection ndir = NormalBoth);
-            virtual ~BasePolygon() {};
+            AbstractPolygon();
+            AbstractPolygon(bool closed, bool filled, NormalDirection ndir);
+            virtual ~AbstractPolygon() {}
 
-            // Add or get/edit the i-th vertex with applied transformation.
-            // Negative indices wrap around the end, e.g. -1 -> size() - 1
-            virtual auto add(const Point2<T>& point)        -> void;
-            virtual auto edit(size_t i, const Point2<T>& p) -> void;
-            virtual auto get(int i) const                   -> Point2<T>;
-
-            // Add or get/edit the i-th vertex, disregarding transformations.
-            // Negative indices wrap around the end, e.g. -1 -> size() - 1
-            auto addRaw(const Point2<T>& point)        -> void;
-            auto editRaw(size_t i, const Point2<T>& p) -> void;
-            auto getRaw(int i) const                   -> const Point2<T>&;
+            virtual void      add(const Point2<T>& point)          = 0;
+            virtual void      edit(size_t i, const Point2<T>& p)   = 0;
+            virtual void      insert(size_t i, const Point2<T>& p) = 0;
+            virtual void      remove(size_t i)                     = 0;
+            virtual void      clear()                              = 0;
+            virtual size_t    size() const                         = 0;
+            virtual Point2<T> get(size_t i) const                  = 0;
+            virtual AABB<T>   getBBox() const                      = 0;
+            virtual bool      isConvex() const                     = 0;
 
             // Return a line segment from point i to point j.
-            // Negative indices wrap around the end, e.g. -1 -> size() - 1
-            auto getSegment(int i, int j, bool raw = false) const -> Line2<T>;
+            Line2<T> getSegment(size_t i, size_t j) const;
 
-            // Callback signature: (const Line2<T>&) -> bool
+            // Calls a lambda for each two consecutive points.
             // Returning true breaks the loop.
+            // Callback signature: bool (const Line2<T>&)
             template <typename F>
-            auto foreachSegment(F callback, bool raw = false) const -> void;
-
-            auto intersect(const Line2<T>& line, bool convex = false) const   -> Intersection<T>;
-            auto intersect(const Point2<T>& point, bool convex = false) const -> bool;
-
-            // Returns nearest intersection
-            // Basically the same as intersect(), but without early-out checks.
-            // Is used internally by intersect().
-            auto findNearest(const Line2<T>& line) const -> Intersection<T>;
-
-            // Returns the bounding box with offset applied
-            auto getBBox() const -> const AABB<T>&;
-
-            // Remove all vertices
-            auto clear() -> void;
-
-            auto size() const -> size_t;
+            void foreachSegment(F f) const;
 
         public:
-            PolygonType type;
+            bool closed;
+            bool filled;
             NormalDirection normaldir;
 
         protected:
-            // Called whenever the vertix list changed
-            virtual auto _onVertexChanged() -> void {};
-
-            // Recalculate the bounding box
-            auto _recalculate() -> void;
-
-            // non-const getRaw() version
-            auto _getRaw(int i) -> Point2<T>&;
-
-        protected:
-            AABB<T> _bbox;
-            std::vector<Point2<T>> _points;
+            // NOTE: these are intentionally not the default for the
+            //       respective virtual functions as they are not cached
+            //       but recalculate on every call.
+            AABB<T> _calculateBBox() const;
+            bool _calculateConvex() const;
     };
 
 
+    // TODO: find a better class name
     template <typename T>
-    class Polygon : public BasePolygon<T>
+    class BasePolygon : public AbstractPolygon<T>
     {
         public:
-            Polygon(PolygonType type = TriangleStrip, NormalDirection ndir = NormalBoth);
-            Polygon(size_t size, PolygonType type = TriangleStrip, NormalDirection ndir = NormalBoth);
-            virtual ~Polygon() {};
+            BasePolygon();
+            BasePolygon(bool closed, bool filled, NormalDirection ndir);
+            virtual ~BasePolygon() {};
 
-            virtual auto add(const Point2<T>& point)        -> void;
-            virtual auto edit(size_t i, const Point2<T>& p) -> void;
-            virtual auto get(int i) const                   -> Point2<T>;
+            void add(const Point2<T>& point)          final;
+            void edit(size_t i, const Point2<T>& p)   final;
+            void insert(size_t i, const Point2<T>& p) final;
+            void remove(size_t i)                     final;
+            void clear()                              final;
 
-            auto setOffset(const Vec2<T>& off)  -> void;
-            auto getOffset() const              -> const Vec2<T>&;
-            auto move(const Vec2<T>& rel)       -> void;
-            auto setScale(const Vec2<T>& scale) -> void;
-            auto getScale() const               -> const Vec2<T>&;
+            virtual AABB<T> getBBox() const     override;
+            virtual bool    isConvex() const    override;
 
         protected:
-            Vec2<T> _offset;
-            Vec2<T> _scale;
+            // Called whenever the vertex list changed
+            virtual void _onVertexChanged() {};
+
+            virtual void _add(const Point2<T>& point)          = 0;
+            virtual void _edit(size_t i, const Point2<T>& p)   = 0;
+            virtual void _insert(size_t i, const Point2<T>& p) = 0;
+            virtual void _remove(size_t i)                     = 0;
+            virtual void _clear()                              = 0;
+
+        protected:
+            mutable AABB<T> _bbox;
+            mutable bool _convex;
+            mutable bool _bboxdirty;
+            mutable bool _convexdirty;
     };
 }
 
-#include "Polygon.inl"
 
+#include "../math.hpp"
+
+// Implementation
+namespace math
+{
+    // AbstractPolygon
+    template <typename T>
+    AbstractPolygon<T>::AbstractPolygon() :
+        AbstractPolygon(true, true, NormalBoth)
+    { }
+
+    template <typename T>
+    AbstractPolygon<T>::AbstractPolygon(bool closed_, bool filled_, NormalDirection ndir) :
+        closed(closed_),
+        filled(filled_),
+        normaldir(ndir)
+    { }
+
+    template <typename T>
+    Line2<T> AbstractPolygon<T>::getSegment(size_t i, size_t j) const
+    {
+        return Line2<T>(get(i), get(j), Segment);
+    }
+
+    template <typename T>
+    template <typename F>
+    void AbstractPolygon<T>::foreachSegment(F f) const
+    {
+        for (size_t i = 1; i < size(); ++i)
+            if (f(getSegment(i - 1, i)))
+                return;
+        if (closed && size() > 2)
+            f(getSegment(size() - 1, 0));
+    }
+
+    template <typename T>
+    AABB<T> AbstractPolygon<T>::_calculateBBox() const
+    {
+        if (this->size() < 2)
+        {
+            return AABB<T>();
+        }
+
+        Vec2f min = this->get(0).asVector(),
+              max = this->get(0).asVector();
+
+        for (size_t i = 1; i < this->size(); ++i)
+        {
+            auto p = this->get(i);
+            for (int k = 0; k < 2; ++k)
+            {
+                min[k] = std::min(min[k], p[k]);
+                max[k] = std::max(max[k], p[k]);
+            }
+        }
+
+        return AABB<T>(min.asPoint(), max - min);
+    }
+
+    template <typename T>
+    bool AbstractPolygon<T>::_calculateConvex() const
+    {
+        if (this->size() <= 3)
+            return true;
+        else
+        {
+            int sign;
+            for (size_t i = 0; i < this->size(); ++i)
+            {
+                auto a = this->get(math::wrap(i + 1, this->size())) - this->get(i);
+                auto b = this->get(math::wrap(i + 2, this->size())) - this->get(i);
+
+                int newsign = math::sign(a.cross(b));
+                if (i == 0)
+                    sign = newsign;
+                else if (newsign != 0 && sign != newsign)
+                    return false;
+            }
+
+            return true;
+        }
+    }
+
+
+
+
+    // BasePolygon
+    template <typename T>
+    BasePolygon<T>::BasePolygon() :
+        _convex(false),
+        _bboxdirty(true),
+        _convexdirty(true)
+        // NOTE: BBox and convexity should recalculate because it doesn't
+        //       know if derived classes automatically add some vertices.
+    { }
+
+    // BasePolygon
+    template <typename T>
+    BasePolygon<T>::BasePolygon(bool closed, bool filled, NormalDirection ndir) :
+        AbstractPolygon<T>(closed, filled, ndir),
+        _convex(false),
+        _bboxdirty(true),
+        _convexdirty(true)
+        // NOTE: BBox and convexity should recalculate because it doesn't
+        //       know if derived classes automatically add some vertices.
+    { }
+
+    template <typename T>
+    void BasePolygon<T>::add(const Point2<T>& point)
+    {
+        _add(point);
+        if (!_bbox.contains(this->get(this->size() - 1)))
+            _bboxdirty = true;
+        _convexdirty = true;
+        _onVertexChanged();
+    }
+
+    template <typename T>
+    void BasePolygon<T>::edit(size_t i, const Point2<T>& p)
+    {
+        _edit(i, p);
+        _bboxdirty = true;
+        _convexdirty = true;
+        _onVertexChanged();
+    }
+
+    template <typename T>
+    void BasePolygon<T>::insert(size_t i, const Point2<T>& p)
+    {
+        _insert(i, p);
+        if (!_bbox.contains(this->get(i)))
+            _bboxdirty = true;
+        _convexdirty = true;
+        _onVertexChanged();
+    }
+
+    template <typename T>
+    void BasePolygon<T>::remove(size_t i)
+    {
+        _remove(i);
+        _bboxdirty = true;
+        _convexdirty = true;
+        _onVertexChanged();
+    }
+
+
+    template <typename T>
+    void BasePolygon<T>::clear()
+    {
+        _clear();
+        _bboxdirty = true;
+        _convexdirty = true;
+        _onVertexChanged();
+    }
+
+    template <typename T>
+    AABB<T> BasePolygon<T>::getBBox() const
+    {
+        if (_bboxdirty)
+        {
+            _bbox = this->_calculateBBox();
+            _bboxdirty = false;
+        }
+        return _bbox;
+    }
+
+    template <typename T>
+    bool BasePolygon<T>::isConvex() const
+    {
+        if (_convexdirty)
+        {
+            _convex = this->_calculateConvex();
+            _convexdirty = false;
+        }
+        return _convex;
+    }
+}
 #endif

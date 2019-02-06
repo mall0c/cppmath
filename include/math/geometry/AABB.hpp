@@ -7,9 +7,6 @@
 namespace math
 {
     template <class T>
-    class BasePolygon;
-
-    template <class T>
     class AABB
     {
         public:
@@ -29,16 +26,12 @@ namespace math
 
             auto center(T x, T y)           -> void;
             auto center(const Point2<T>& p) -> void;
-            auto getCenter() const          -> Vec2<T>;
+            auto getCenter() const          -> Point2<T>;
 
             auto contains(const Point2<T>& point) const       -> bool;
             auto intersect(const Point2<T>& point) const      -> bool;
             auto contains(const AABB<T>& rect) const          -> bool;
             auto intersect(const AABB<T>& rect) const         -> Intersection<T>;
-
-            auto sweep(const Vec2<T>& vel, AABB<T> box) const -> Intersection<T>;
-            auto sweep(const Vec2<T>& vel, const BasePolygon<T>& pol, bool avgCorners = true) const -> Intersection<T>;
-            auto sweep(const Vec2<T>& vel, const Line2<T>& line, NormalDirection ndir = NormalBoth) const -> Intersection<T>;
 
             auto operator!=(const AABB<T>& r) const -> bool;
             auto operator==(const AABB<T>& r) const -> bool;

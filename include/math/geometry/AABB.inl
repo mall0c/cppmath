@@ -96,9 +96,9 @@ namespace math
     }
 
     template <class T>
-    Vec2<T> AABB<T>::getCenter() const
+    Point2<T> AABB<T>::getCenter() const
     {
-        return pos + size / 2;
+        return pos.asPoint() + size / 2;
     }
 
     template <class T>
@@ -139,140 +139,6 @@ namespace math
                 Vec2<T>(px * (dx < 0 ? -1 : 1), py * (dy < 0 ? -1 : 1)),
                 px < py ? Vec2<T>(-sign(dx), 0) : Vec2<T>(0, -sign(dy)));
     };
-
-    template <class T>
-    Intersection<T> AABB<T>::sweep(const Vec2<T>& vel, AABB<T> box) const
-    {
-        box.extend(*this);
-        auto isec = Line2<T>(getCenter().asPoint(), vel, Segment).intersect(box);
-        if (isec)
-            isec.type = SweptAABBxAABB;
-        return isec;
-    }
-
-    template <class T>
-    Intersection<T> AABB<T>::sweep(const Vec2<T>& vel, const BasePolygon<T>& pol, bool avgCorners) const
-    {
-        // TODO: consider adding a bool that skips the normal check
-
-        if (!sweep(vel, pol.getBBox()))
-            return Intersection<T>();
-
-        Intersection<T> nearest;
-        auto cb = [&](const Line2<T>& seg) {
-            auto isec = sweep(vel, seg, pol.normaldir);
-            if (isec && isec.normal.dot(vel) <= 0)
-            {
-                if (avgCorners && nearest && std::abs(isec.time - nearest.time) < 0.01)
-                {
-                    nearest.p = (isec.time < nearest.time) ? isec.p : nearest.p;
-                    nearest.time = std::min(nearest.time, isec.time);
-                    // nearest.normal = (nearest.normal + isec.normal) / 2;
-                    nearest.normal = (nearest.normal + isec.normal).normalized();
-                }
-                else if (!nearest || isec.time < nearest.time)
-                    nearest = isec;
-            }
-            return false;
-        };
-        pol.foreachSegment(cb);
-        return nearest;
-    }
-
-    template <class T>
-    Intersection<T> AABB<T>::sweep(const Vec2<T>& vel, const Line2<T>& line, NormalDirection ndir) const
-    {
-        // Based on https://gamedev.stackexchange.com/questions/29479/swept-aabb-vs-line-segment-2d
-        // Praise OP
-
-        // TODO: support rays
-        assert(line.type != Ray && "Rays are not supported yet");
-
-        auto nd = line.d.normalized(); // normalized line direction
-        auto half = size / 2;
-        auto dist = nd.left().dot(line.p.asVector() - getCenter());
-        auto ln = dist < 0 ? nd.right() : nd.left();
-        dist = std::abs(dist);
-        auto r = half.dot(abs(ln));
-        auto velproj = ln.dot(vel);
-
-        if (velproj < 0)
-            r *= -1;
-
-        Vec2<T> times(std::max((dist - r) / velproj, 0.0f),
-                      std::min((dist + r) / velproj, 1.0f));
-
-        if (line.type == Segment)
-        {
-            // AABB vs AABB sweep
-            AABB<T> linebox = line.getBBox();
-            Vec2<T> aabbmax = pos + size;
-            Vec2<T> lineMax = linebox.pos + linebox.size;
-
-            // X axis overlap
-            if (vel.x < 0) //Sweeping left
-            {
-                if (aabbmax.x < linebox.pos.x)
-                    return Intersection<T>();
-                times[0] = std::max((lineMax.x - pos.x) / vel.x, times[0]);
-                times[1] = std::min((linebox.pos.x - aabbmax.x) / vel.x, times[1]);
-            }
-            else if (vel.x > 0) //Sweeping right
-            {
-                if (pos.x > lineMax.x)
-                    return Intersection<T>();
-                times[0] = std::max((linebox.pos.x - aabbmax.x) / vel.x, times[0]);
-                times[1] = std::min((lineMax.x - pos.x) / vel.x, times[1]);
-            }
-            else
-            {
-                if (linebox.pos.x > aabbmax.x || lineMax.x < pos.x)
-                    return Intersection<T>();
-            }
-
-            if (times[0] > times[1])
-                return Intersection<T>();
-
-            // Y axis overlap
-            if (vel.y < 0) //Sweeping down
-            {
-                if (aabbmax.y < linebox.pos.y)
-                    return Intersection<T>();
-                times[0] = std::max((lineMax.y - pos.y) / vel.y, times[0]);
-                times[1] = std::min((linebox.pos.y - aabbmax.y) / vel.y, times[1]);
-            }
-            else if (vel.y > 0) //Sweeping up
-            {
-                if (pos.y > lineMax.y)
-                    return Intersection<T>();
-                times[0] = std::max((linebox.pos.y - aabbmax.y) / vel.y, times[0]);
-                times[1] = std::min((lineMax.y - pos.y) / vel.y, times[1]);
-            }
-            else
-            {
-                if (linebox.pos.y > aabbmax.y || lineMax.y < pos.y)
-                    return Intersection<T>();
-            }
-
-            if (times[0] < 0 || times[1] > 1)
-                return Intersection<T>();
-        }
-
-        if (times[0] > times[1])
-            return Intersection<T>();
-
-        // NOTE: if changing something related to normal directions, remember to change it in Line vs Line
-        if (ndir == NormalLeft)
-            ln = nd.left();
-        else if (ndir == NormalRight)
-            ln = nd.right();
-        else
-            ln = -ln;
-
-        Intersection<T> isec((pos + vel * times[0]).asPoint(), times, ln);
-        isec.type = SweptAABBxLine;
-        return isec;
-    }
 
     template <class T>
     bool AABB<T>::operator!=(const AABB<T>& r) const

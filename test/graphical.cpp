@@ -1,13 +1,14 @@
 // TODO:
 // This testcode is a disaster and needs to be cleaned up if not rewritten.
-// For some reason it sometimes works fine and sometimes don't.
+// For some reason it sometimes works fine and sometimes doesn't.
 // A proper rewrite without union hell will probably fix it.
 
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include "math/geometry/Line2.hpp"
 #include "math/geometry/AABB.hpp"
-#include "math/geometry/Polygon.hpp"
+#include "math/geometry/OffsetPolygon.hpp"
+#include "math/geometry/intersect.hpp"
 #include <time.h>
 #include <cstdlib>
 #include <vector>
@@ -25,7 +26,7 @@ typedef AABBf AABBT;
 typedef Point2f PointT;
 typedef Line2f LineT;
 typedef Intersection<float> IsecT;
-typedef Polygon<float> PolygonT;
+typedef OffsetPolygon<float> PolygonT;
 
 class Shape
 {
@@ -36,13 +37,11 @@ class Shape
             Ray,        // Only used for setCursor()
             Segment,    // Only used for setCursor()
             AABB,
-            Polygon,
-            LineStrip   // Only used for setCursor()
+            Polygon
         };
 
     public:
         Shape() {}
-        ~Shape();
         void render(sf::RenderTarget& target) const;
         void renderCollision(sf::RenderTarget& target, const Shape& shape) const;
 
@@ -62,11 +61,12 @@ class Shape
         };
 };
 
+static const sf::Color defaultColor(131, 148, 150);
 
 void create(std::vector<Shape>& vec);
 
-void drawRect(sf::RenderTarget& target, const AABBT& aabb, sf::Color col = sf::Color(131, 148, 150));
-void drawLine(sf::RenderTarget& target, const PointT& p1, const PointT& p2, sf::Color col = sf::Color(131, 148, 150));
+void drawRect(sf::RenderTarget& target, const AABBT& aabb, sf::Color col = defaultColor);
+void drawLine(sf::RenderTarget& target, const PointT& p1, const PointT& p2, sf::Color col = defaultColor);
 void drawPoint(sf::RenderTarget& target, const PointT& p, sf::Color c = sf::Color::Red);
 
 int main(int argc, char *argv[])
@@ -120,18 +120,6 @@ int main(int argc, char *argv[])
                         cursor.move(SPEED, 0);
                         break;
 
-                    case sf::Keyboard::Up:
-                    case sf::Keyboard::Right:
-                        if (cursor.type == Shape::Polygon)
-                            cursor.pol.setScale(cursor.pol.getScale() + VecT(0.2));
-                        break;
-
-                    case sf::Keyboard::Down:
-                    case sf::Keyboard::Left:
-                        if (cursor.type == Shape::Polygon)
-                            cursor.pol.setScale(cursor.pol.getScale() - VecT(0.2));
-                        break;
-
                     case sf::Keyboard::Num1:
                         cursor.set(Shape::Line);
                         break;
@@ -152,8 +140,14 @@ int main(int argc, char *argv[])
                         cursor.set(Shape::Polygon);
                         break;
 
-                    case sf::Keyboard::Num6:
-                        cursor.set(Shape::LineStrip);
+                    case sf::Keyboard::C:
+                        if (cursor.type == Shape::Polygon)
+                            cursor.pol.closed = !cursor.pol.closed;
+                        break;
+
+                    case sf::Keyboard::F:
+                        if (cursor.type == Shape::Polygon)
+                            cursor.pol.filled = !cursor.pol.filled;
                         break;
 
                     default:
@@ -178,7 +172,7 @@ int main(int argc, char *argv[])
                                     break;
                             }
                         }
-                        else if (cursor.type == Shape::Polygon || cursor.type == Shape::LineStrip)
+                        else if (cursor.type == Shape::Polygon)
                         {
                             auto p = sf::Mouse::getPosition() - window.getPosition();
                             if (ev.key.code == sf::Keyboard::H)
@@ -191,8 +185,7 @@ int main(int argc, char *argv[])
             {
                 cursor.face(ev.mouseMove.x, ev.mouseMove.y);
             }
-            else if (ev.type == sf::Event::MouseButtonPressed &&
-                    (cursor.type == Shape::Polygon || cursor.type == Shape::LineStrip))
+            else if (ev.type == sf::Event::MouseButtonPressed && cursor.type == Shape::Polygon)
             {
                 cursor.pol.add(PointT(ev.mouseButton.x, ev.mouseButton.y));
             }
@@ -261,8 +254,6 @@ void Shape::set(Shape::Shapes newtype)
 
     if (newtype == Shape::Ray || newtype == Shape::Segment)
         type = Shape::Line;
-    else if (newtype == Shape::LineStrip)
-        type = Shape::Polygon;
     else
         type = newtype;
 
@@ -286,13 +277,6 @@ void Shape::set(Shape::Shapes newtype)
 
         case Shape::Polygon:
             pol.clear();
-            pol.type = PolygonType::TriangleStrip;
-            pol.setOffset(old.asVector());
-            break;
-
-        case Shape::LineStrip:
-            pol.clear();
-            pol.type = PolygonType::LineStrip;
             pol.setOffset(old.asVector());
             break;
     }
@@ -306,13 +290,6 @@ void Shape::move(float x, float y)
         pos += VecT(x, y);
 }
 
-Shape::~Shape()
-{
-    // This needs to be destructed explicitely because it stores a std::vector
-    // if (type == Polygon)
-    //     pol.~PolygonT();
-}
-
 void Shape::render(sf::RenderTarget& target) const
 {
     if (type == AABB)
@@ -320,7 +297,7 @@ void Shape::render(sf::RenderTarget& target) const
     else if (type == Polygon)
     {
         pol.foreachSegment([&](const LineT& seg) {
-            drawLine(target, seg.p, seg.p + seg.d);
+            drawLine(target, seg.p, seg.p + seg.d, pol.filled ? sf::Color::Red : defaultColor);
             return false;
         });
         drawRect(target, pol.getBBox(), sf::Color::Magenta);
@@ -333,6 +310,7 @@ void Shape::render(sf::RenderTarget& target) const
             drawLine(target, line.p - line.d * 1000, line.p + line.d * 1000);
         else if (line.type == LineType::Segment)
             drawLine(target, line.p, line.p + line.d);
+        drawPoint(target, line.p, defaultColor);
     }
 }
 
@@ -348,7 +326,7 @@ void Shape::renderCollision(sf::RenderTarget& target, const Shape& shape) const
             else if (shape.type == AABB)
                 isec = line.intersect(shape.aabb);
             else if (shape.type == Polygon)
-                isec = shape.pol.intersect(line);
+                isec = intersect(line, shape.pol);
             break;
 
         case AABB:
@@ -360,7 +338,7 @@ void Shape::renderCollision(sf::RenderTarget& target, const Shape& shape) const
 
         case Polygon:
             if (shape.type == Line)
-                isec = pol.intersect(shape.line, false);
+                isec = intersect(shape.line, pol);
             break;
     }
 

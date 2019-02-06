@@ -2,6 +2,8 @@
 #include <SFML/Graphics.hpp>
 #include "math/geometry/Line2.hpp"
 #include "math/geometry/AABB.hpp"
+#include "math/geometry/OffsetPolygon.hpp"
+#include "math/geometry/intersect.hpp"
 #include <time.h>
 #include <cstdlib>
 #include <vector>
@@ -10,7 +12,7 @@
 #define WIDTH 640
 #define HEIGHT 480
 #define SPEED 5
-#define NUM_OBJECTS 12
+#define NUM_OBJECTS 8
 
 using namespace std;
 using namespace math;
@@ -21,10 +23,12 @@ typedef Point2f PointT;
 typedef Line2f LineT;
 typedef Intersection<float> IsecT;
 
+static const sf::Color defaultColor(131, 148, 150);
+
 void create(std::vector<LineT>& vec);
 
-void drawRect(sf::RenderTarget& target, const AABBT& aabb, sf::Color col = sf::Color(131, 148, 150));
-void drawLine(sf::RenderTarget& target, const PointT& p1, const PointT& p2, sf::Color col = sf::Color(131, 148, 150));
+void drawRect(sf::RenderTarget& target, const AABBT& aabb, sf::Color col = defaultColor);
+void drawLine(sf::RenderTarget& target, const PointT& p1, const PointT& p2, sf::Color col = defaultColor);
 void drawPoint(sf::RenderTarget& target, const PointT& p, sf::Color c = sf::Color::Red);
 
 
@@ -39,23 +43,14 @@ int main(int argc, char *argv[])
     AABBT aabb(0, 0, 100, 70);
     VecT speed;
     std::vector<LineT> shapes(NUM_OBJECTS);
-    shapes[0].p = PointT(150, HEIGHT / 2);
-    shapes[1].p = PointT(WIDTH / 2, 100);
-    shapes[2].p = PointT(WIDTH - 150, HEIGHT / 2);
-    shapes[3].p = PointT(WIDTH / 2, HEIGHT - 100);
-    shapes[0].d = shapes[1].p - shapes[0].p;
-    shapes[1].d = shapes[2].p - shapes[1].p;
-    shapes[2].d = shapes[3].p - shapes[2].p;
-    shapes[3].d = shapes[0].p - shapes[3].p;
-    shapes[0].type = shapes[1].type = Segment;
-    shapes[2].type = Ray;
-    shapes[3].type = Line;
-    // create(shapes);
+    create(shapes);
 
-    Polygon<float> pol(LineStrip, NormalLeft);
-    for (int i = 0; i < 4; ++i)
-        pol.add(shapes[i].p);
-    pol.add(shapes[0].p);
+    OffsetPolygon<float> pol;
+    pol.normaldir = NormalLeft;
+    pol.add(PointT(150, HEIGHT / 2));
+    pol.add(PointT(WIDTH / 2, 100));
+    pol.add(PointT(WIDTH - 150, HEIGHT / 2));
+    pol.add(PointT(WIDTH / 2, HEIGHT - 100));
     pol.move(VecT(100, 0));
 
     sf::Event ev;
@@ -126,6 +121,14 @@ int main(int argc, char *argv[])
                     case sf::Keyboard::L:
                         speed.fill(100, 0);
                         break;
+
+                    case sf::Keyboard::C:
+                        pol.closed = !pol.closed;
+                        break;
+
+                    case sf::Keyboard::F:
+                        pol.filled = !pol.filled;
+                        break;
                 }
             }
             else if (ev.type == sf::Event::MouseMoved)
@@ -159,7 +162,7 @@ int main(int argc, char *argv[])
             else if (line.type == LineType::Segment)
                 drawLine(window, line.p, line.p + line.d);
 
-            auto isec = aabb.sweep(speed, line);
+            auto isec = sweep(aabb, speed, line);
             // if (nearest && isec && std::abs(isec.time - nearest.time) < 0.01)
             // {
             //     cout<<"isec.time: "<<isec.time<<endl;
@@ -171,11 +174,11 @@ int main(int argc, char *argv[])
         }
 
         pol.foreachSegment([&](const LineT& seg) {
-            drawLine(window, seg.p, seg.p + seg.d);
+            drawLine(window, seg.p, seg.p + seg.d, pol.filled ? sf::Color::Red : defaultColor);
             return false;
         });
 
-        auto isec = aabb.sweep(speed, pol);
+        auto isec = sweep(aabb, speed, pol);
         if (!nearest || (isec && isec.time < nearest.time))
             nearest = isec;
 
