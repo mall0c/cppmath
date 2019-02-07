@@ -2,23 +2,40 @@
 #define MATH_INTERSECTION_HPP
 
 #include "Polygon.hpp"
+#include "Intersection.hpp"
 
 namespace math
 {
+    template <typename T> Intersection<T> intersect(const Line2<T>& line, const AbstractPolygon<T>& pol);
+    template <typename T> bool            intersect(const Point2<T>& point, const AbstractPolygon<T>& pol);
+
+    template <typename T> Intersection<T> intersect(const Line2<T>& line, const Line2<T>& other, NormalDirection ndir = NormalBoth);
+    template <typename T> Intersection<T> intersect(const Line2<T>& line, const AABB<T>& box);
+    template <typename T> bool            intersect(const Line2<T>& line, const Point2<T>& point);
+
+    template <typename T> bool            intersect(const AABB<T>& aabb, const Point2<T>& point);
+    template <typename T> Intersection<T> intersect(const AABB<T>& aabb, const AABB<T>& other);
+    template <typename T> bool            contains(const AABB<T>& aabb, const AABB<T>& other);
+
+    template <typename T> Intersection<T> sweep(const AABB<T>& aabb, const Vec2<T>& vel, AABB<T> other);
+    template <typename T> Intersection<T> sweep(const AABB<T>& aabb, const Vec2<T>& vel, const AbstractPolygon<T>& pol, bool avgCorners = true, bool backfaceCulling = true);
+    template <typename T> Intersection<T> sweep(const AABB<T>& aabb, const Vec2<T>& vel, const Line2<T>& line, NormalDirection ndir = NormalBoth);
+
+
+    // Helpers
+
     // Returns nearest intersection
     // Basically the same as intersect(), but without early-out checks.
     // Is used internally by intersect().
     template <typename T>
     Intersection<T> findNearest(const Line2<T>& line, const AbstractPolygon<T>& pol);
 
-
-    template <typename T> Intersection<T> intersect(const Line2<T>& line, const AbstractPolygon<T>& pol);
-    template <typename T> bool            intersect(const Point2<T>& point, const AbstractPolygon<T>& pol);
-
-    template <typename T> Intersection<T> sweep(const AABB<T>& aabb, const Vec2<T>& vel, AABB<T> other);
-    template <typename T> Intersection<T> sweep(const AABB<T>& aabb, const Vec2<T>& vel, const AbstractPolygon<T>& pol, bool avgCorners = true, bool backfaceCulling = true);
-    template <typename T> Intersection<T> sweep(const AABB<T>& aabb, const Vec2<T>& vel, const Line2<T>& line, NormalDirection ndir = NormalBoth);
+    template <typename T>
+    bool checkScale(const Line2<T>& line, double u);
 }
+
+
+#include <cassert>
 
 // Implementation
 namespace math
@@ -33,7 +50,7 @@ namespace math
         Intersection<T> nearest;
 
         auto cb = [&](const Line2<T>& seg) {
-            auto isec = line.intersect(seg, pol.normaldir);
+            auto isec = intersect(line, seg, pol.normaldir);
             if (!nearest || (isec && isec.time < nearest.time))
                 nearest = isec;
             return false;
@@ -43,6 +60,16 @@ namespace math
         return nearest;
     }
 
+    template <class T>
+    bool checkScale(const Line2<T>& line, double u)
+    {
+        if (line.type == Ray)
+            return u >= 0;
+        if (line.type == Segment)
+            return u >= 0 && u <= 1;
+        return true;
+    }
+
 
     template <typename T>
     Intersection<T> intersect(const Line2<T>& line, const AbstractPolygon<T>& pol)
@@ -50,7 +77,7 @@ namespace math
         if (pol.size() < 2)
             return Intersection<T>();
 
-        if (!line.intersect(pol.getBBox()))
+        if (!intersect(line, pol.getBBox()))
             return Intersection<T>();
 
         auto isec = findNearest(line, pol);
@@ -72,9 +99,9 @@ namespace math
             return false;
 
         if (pol.size() == 2)
-            return pol.getSegment(0, 1).intersect(point);
+            return intersect(pol.getSegment(0, 1), point);
 
-        if (!pol.getBBox().contains(point))
+        if (!intersect(pol.getBBox(), point))
             return false;
 
         if (pol.closed && pol.filled)
@@ -83,7 +110,7 @@ namespace math
             size_t num = 0;
 
             pol.foreachSegment([&](const Line2<T>& line) {
-                if (ray.intersect(line))
+                if (intersect(ray, line))
                     ++num;
                 return pol.isConvex() ? num == 2 : false;
             });
@@ -93,7 +120,7 @@ namespace math
         else
         {
             for (size_t i = 1; i < pol.size(); ++i)
-                if (pol.getSegment(i - 1, i).intersect(point))
+                if (intersect(pol.getSegment(i - 1, i), point))
                     return true;
         }
 
@@ -104,7 +131,7 @@ namespace math
     Intersection<T> sweep(const AABB<T>& aabb, const Vec2<T>& vel, AABB<T> other)
     {
         other.extend(aabb);
-        auto isec = Line2<T>(aabb.getCenter(), vel, Segment).intersect(other);
+        auto isec = intersect(Line2<T>(aabb.getCenter(), vel, Segment), other);
         if (isec)
             isec.type = SweptAABBxAABB;
         return isec;
@@ -231,6 +258,137 @@ namespace math
         Intersection<T> isec((aabb.pos + vel * times[0]).asPoint(), times, ln);
         isec.type = SweptAABBxLine;
         return isec;
+    }
+
+    template <typename T>
+    Intersection<T> intersect(const Line2<T>& line, const Line2<T>& other, NormalDirection ndir)
+    {
+        if (line.isParallel(other))
+            return Intersection<T>();
+
+        const Vec2<T> dist = other.p - line.p;
+        const double m = other.d.cross(line.d),
+                     u = other.d.cross(dist) / m,
+                     v = line.d.cross(dist) / m;
+
+        if (!checkScale(line, u) || !checkScale(other, v))
+            return Intersection<T>();
+
+
+        // NOTE: if changing something related to normal directions, remember to change it in AABB vs Line sweep
+        Vec2<T> normal = other.d.normalized();
+        if (ndir == NormalLeft)
+            normal = normal.left();
+        else if (ndir == NormalRight)
+            normal = normal.right();
+        else
+            normal = normal.left() * sign(m);
+        return Intersection<T>(line.p + line.d * u, Vec2<T>(u, v), normal);
+    }
+
+    template <typename T>
+    Intersection<T> intersect(const Line2<T>& line, const AABB<T>& box)
+    {
+        // Adapted from http://noonat.github.io/intersect/#aabb-vs-segment
+
+        // If d contains a zero element, this stores the index of the
+        // non-zero element. Otherwise -1.
+        int j = -1;
+
+        // Check if an element in d is 0.
+        for (size_t i = 0; i < 2; ++i)
+        {
+            if (almostEquals(line.d[i], (T)0))
+            {
+                if (line.p[i] >= box.pos[i] && line.p[i] < box.pos[i] + box.size[i])
+                {
+                    j = (i + 1) % 2;
+                    break;
+                }
+                return Intersection<T>();
+            }
+        }
+
+        // near will be reused to store the final near and far time.
+        Vec2d near;
+        Vec2<T> signs = line.d.signs();
+        Vec2<T> normal;
+
+        if (j == -1)
+        {
+            Vec2d half = box.size / 2.0;
+            near      = ((box.pos + half) - signs * half - line.p.asVector()) / line.d;
+            Vec2d far = ((box.pos + half) + signs * half - line.p.asVector()) / line.d;
+
+            if (near.x > far.y || near.y > far.x)
+                return Intersection<T>();
+
+            if (near.x > near.y)
+                normal.x = -signs.x;
+            else
+                normal.y = -signs.y;
+
+            near.x = std::max(near.x, near.y); // near time
+            near.y = std::min(far.x, far.y); // far time
+        }
+        else
+        {
+            int s = signs[j];
+            near.x = (box.pos[j] + ((s == 1) ? 0 : box.size[j]) - line.p[j]) / line.d[j];
+            near.y = (box.pos[j] + ((s != 1) ? 0 : box.size[j]) - line.p[j]) / line.d[j];
+            normal[j] = -s;
+        }
+
+        if (line.type != Line && near.y < 0)
+            return Intersection<T>();
+
+        if (line.type == Segment && near.x > 1)
+            return Intersection<T>();
+
+        if (line.type != Line && near.x < 0)
+            near.x = 0;
+
+        if (line.type == Segment && near.y > 1)
+            near.y = 1;
+
+        return Intersection<T>(line.p + line.d * near.x,
+                               line.p + line.d * near.y,
+                               near, normal);
+    }
+
+    template <typename T>
+    bool intersect(const Line2<T>& line, const Point2<T>& point)
+    {
+        return almostZero((point - line.closestPoint(point, true)).abs_sqr());
+    }
+
+
+    template <typename T>
+    bool intersect(const AABB<T>& aabb, const Point2<T>& point)
+    {
+        return point.asVector() >= aabb.pos && point.asVector() < aabb.pos + aabb.size;
+    }
+
+    template <typename T>
+    Intersection<T> intersect(const AABB<T>& aabb, const AABB<T>& other)
+    {
+        // Adapted from http://noonat.github.io/intersect/#aabb-vs-aabb
+        auto d = other.getCenter() - aabb.getCenter();
+        auto p = (other.size / 2 + aabb.size / 2) - abs(d);
+
+        if (p.x < 0 || p.y < 0)
+            return Intersection<T>();
+
+        return Intersection<T>(
+                p * d.signs(),
+                p.x < p.y ? Vec2<T>(-sign(d.x), 0) : Vec2<T>(0, -sign(d.y)));
+    }
+
+    template <typename T>
+    bool contains(const AABB<T>& aabb, const AABB<T>& other)
+    {
+        return intersect(aabb, other.pos.asPoint())
+            && intersect(aabb, other.pos.asPoint() + other.size);
     }
 }
 

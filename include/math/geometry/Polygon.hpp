@@ -84,6 +84,7 @@ namespace math
 
 
 #include "../math.hpp"
+#include "intersect.hpp"
 
 // Implementation
 namespace math
@@ -194,7 +195,7 @@ namespace math
     void BasePolygon<T>::add(const Point2<T>& point)
     {
         _add(point);
-        if (!_bbox.contains(this->get(this->size() - 1)))
+        if (!intersect(_bbox, this->get(this->size() - 1)))
             _bboxdirty = true;
         _convexdirty = true;
         _onVertexChanged();
@@ -213,7 +214,7 @@ namespace math
     void BasePolygon<T>::insert(size_t i, const Point2<T>& p)
     {
         _insert(i, p);
-        if (!_bbox.contains(this->get(i)))
+        if (!intersect(_bbox, this->get(i)))
             _bboxdirty = true;
         _convexdirty = true;
         _onVertexChanged();

@@ -2,7 +2,6 @@
 #define CPPMATH_AABB_HPP
 
 #include "Vector.hpp"
-#include "Intersection.hpp"
 
 namespace math
 {
@@ -27,11 +26,6 @@ namespace math
             auto center(T x, T y)           -> void;
             auto center(const Point2<T>& p) -> void;
             auto getCenter() const          -> Point2<T>;
-
-            auto contains(const Point2<T>& point) const       -> bool;
-            auto intersect(const Point2<T>& point) const      -> bool;
-            auto contains(const AABB<T>& rect) const          -> bool;
-            auto intersect(const AABB<T>& rect) const         -> Intersection<T>;
 
             auto operator!=(const AABB<T>& r) const -> bool;
             auto operator==(const AABB<T>& r) const -> bool;

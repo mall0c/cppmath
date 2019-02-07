@@ -3,7 +3,6 @@
 
 #include "Vector.hpp"
 #include "Point2.hpp"
-#include "../type_traits.hpp"
 #include "../compat.hpp"
 
 /*
@@ -18,9 +17,6 @@
 
 namespace math
 {
-    template <class T>
-    class Intersection;
-
     template <class T>
     class AABB;
 
@@ -52,15 +48,8 @@ namespace math
             auto closestPoint(const Point2<T>& point, bool clamp = true) const -> Point2<T>;
             auto distance(const Point2<T>& point, bool clamp = true) const     -> T;
 
-            auto intersect(const Line2<T>& line, NormalDirection ndir = NormalBoth) const -> Intersection<T>;
-            auto intersect(const Point2<T>& p2) const  -> bool;
-            auto intersect(const AABB<T>& box) const   -> Intersection<T>;
-
             // Only useful for segments
             auto getBBox() const -> AABB<T>;
-
-        private:
-            auto _checkScale(double u) const -> bool;
 
         public:
             Point2<T> p; // start point

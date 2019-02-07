@@ -1,4 +1,5 @@
 #include "math/geometry/Line2.hpp"
+#include "math/geometry/intersect.hpp"
 #include "math/math.hpp"
 #include <cassert>
 #include <cstdlib>
@@ -75,7 +76,7 @@ bool testIntersect(LineType typea, LineType typeb)
             b.p = a.p + u;
             b.d = a.d * getRandom<T>();
 
-            if (a.intersect(b))
+            if (intersect(a, b))
             {
                 error("Intersection detected.", a, b);
                 return false;

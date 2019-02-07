@@ -60,7 +60,13 @@ namespace math
     template <typename T>
     constexpr int sign(T val)
     {
-        return (T(0) < val) - (val < T(0));
+        return val < T(0) ? -1 : val > T(0) ? 1 : 0;
+    }
+
+    template <typename T>
+    constexpr int nonzerosign(T val)
+    {
+        return val < T(0) ? -1 : 1;
     }
 
     template <typename T>

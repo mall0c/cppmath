@@ -1,10 +1,7 @@
 #ifndef CPPMATH_AABB_INL
 #define CPPMATH_AABB_INL
 
-#include <cassert>
 #include "AABB.hpp"
-#include "Polygon.hpp"
-#include "../math.hpp"
 
 namespace math
 {
@@ -100,45 +97,6 @@ namespace math
     {
         return pos.asPoint() + size / 2;
     }
-
-    template <class T>
-    bool AABB<T>::contains(const Point2<T>& point) const
-    {
-        return point.asVector() >= pos && point.asVector() < pos + size;
-    }
-
-    template <class T>
-    bool AABB<T>::intersect(const Point2<T>& point) const
-    {
-        return contains(point);
-    }
-
-    template <class T>
-    bool AABB<T>::contains(const AABB<T>& rect) const
-    {
-        return contains(rect.pos) && contains(rect.pos + rect.size);
-    }
-
-    template <class T>
-    Intersection<T> AABB<T>::intersect(const AABB<T>& other) const
-    {
-        // Adapted from http://noonat.github.io/intersect/#aabb-vs-aabb
-        auto center = getCenter();
-        auto othercenter = other.getCenter();
-        T dx = othercenter.x - center.x;
-        T px = (other.size.x / 2 + size.x / 2) - std::abs(dx);
-        if (px < 0)
-            return Intersection<T>();
-
-        T dy = othercenter.y - center.y;
-        T py = (other.size.y / 2 + size.y / 2) - std::abs(dy);
-        if (py < 0)
-            return Intersection<T>();
-
-        return Intersection<T>(
-                Vec2<T>(px * (dx < 0 ? -1 : 1), py * (dy < 0 ? -1 : 1)),
-                px < py ? Vec2<T>(-sign(dx), 0) : Vec2<T>(0, -sign(dy)));
-    };
 
     template <class T>
     bool AABB<T>::operator!=(const AABB<T>& r) const

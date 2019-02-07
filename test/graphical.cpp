@@ -1,8 +1,3 @@
-// TODO:
-// This testcode is a disaster and needs to be cleaned up if not rewritten.
-// For some reason it sometimes works fine and sometimes doesn't.
-// A proper rewrite without union hell will probably fix it.
-
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include "math/geometry/Line2.hpp"
@@ -41,7 +36,7 @@ class Shape
         };
 
     public:
-        Shape() {}
+        Shape();
         void render(sf::RenderTarget& target) const;
         void renderCollision(sf::RenderTarget& target, const Shape& shape) const;
 
@@ -216,7 +211,7 @@ int main(int argc, char *argv[])
 
 void create(std::vector<Shape>& vec)
 {
-    for (size_t i = 1; i <= NUM_OBJECTS; ++i)
+    for (size_t i = 1; i < vec.size(); ++i)
     {
         if (i % 4 == 3)
         {
@@ -233,6 +228,10 @@ void create(std::vector<Shape>& vec)
         }
     }
 }
+
+Shape::Shape() :
+    line()
+{ }
 
 void Shape::face(float x, float y)
 {
@@ -322,18 +321,18 @@ void Shape::renderCollision(sf::RenderTarget& target, const Shape& shape) const
     {
         case Line:
             if (shape.type == Line)
-                isec = line.intersect(shape.line);
+                isec = intersect(line, shape.line);
             else if (shape.type == AABB)
-                isec = line.intersect(shape.aabb);
+                isec = intersect(line, shape.aabb);
             else if (shape.type == Polygon)
                 isec = intersect(line, shape.pol);
             break;
 
         case AABB:
             if (shape.type == Line)
-                isec = shape.line.intersect(aabb);
+                isec = intersect(shape.line, aabb);
             else
-                isec = aabb.intersect(shape.aabb);
+                isec = intersect(aabb, shape.aabb);
             break;
 
         case Polygon:
