@@ -181,10 +181,10 @@ namespace math
     };
 
     template <typename T, size_t N>
-    auto min(const Vector<T, N>& a, const Vector<T, N>& b) -> Vector<T, N>;
+    auto mins(const Vector<T, N>& a, const Vector<T, N>& b) -> Vector<T, N>;
 
     template <typename T, size_t N>
-    auto max(const Vector<T, N>& a, const Vector<T, N>& b) -> Vector<T, N>;
+    auto maxs(const Vector<T, N>& a, const Vector<T, N>& b) -> Vector<T, N>;
 
     template <typename T, size_t N>
     auto abs(const Vector<T, N>& vec) -> Vector<T, N>;

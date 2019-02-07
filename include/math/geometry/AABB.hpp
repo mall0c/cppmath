@@ -14,21 +14,22 @@ namespace math
             AABB(const Point2<T>& pos_, const Vec2<T>& size_);
             AABB(const AABB<T>& a, const AABB<T>& b);
             AABB(const AABB<T>& rect) = default;
-            AABB(const Point2<T>& a, const Point2<T>& b);
+
+            static AABB<T> fromPoints(const Point2<T>& a, const Point2<T>& b);
 
         public:
-            auto combine(const AABB<T>& other)                    -> void;
-            auto extend(const AABB<T>& other, bool center = true) -> void;
-            auto extend(const Vec2<T>& size, bool center = true)  -> void;
+            void combine(const AABB<T>& other);
+            void extend(const AABB<T>& other, bool center = true);
+            void extend(const Vec2<T>& size, bool center = true);
 
-            auto isEmpty() const -> bool;
+            bool isEmpty() const;
 
-            auto center(T x, T y)           -> void;
-            auto center(const Point2<T>& p) -> void;
-            auto getCenter() const          -> Point2<T>;
+            void center(T x, T y);
+            void center(const Point2<T>& p);
+            Point2<T> getCenter() const;
 
-            auto operator!=(const AABB<T>& r) const -> bool;
-            auto operator==(const AABB<T>& r) const -> bool;
+            bool operator!=(const AABB<T>& r) const;
+            bool operator==(const AABB<T>& r) const;
 
             template <class T2>
             operator AABB<T2>() const;
