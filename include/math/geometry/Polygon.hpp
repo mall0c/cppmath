@@ -94,6 +94,31 @@ namespace math
             mutable bool _bboxdirty;
             mutable bool _convexdirty;
     };
+
+    template <typename T, typename PolygonType = AbstractPolygon<T>>
+    class PolygonAdapter : public BasePolygon<T>
+    {
+        static_assert(std::is_base_of<AbstractPolygon<T>, PolygonType>(), "PolygonType must be derived from AbstractPolygon");
+        public:
+            PolygonAdapter(PolygonType& pol);
+            virtual ~PolygonAdapter() {}
+
+            virtual size_t size() const override;
+            virtual bool isConvex() const override;
+
+            virtual void     setFillType(FillType filltype) override;
+            virtual FillType getFillType() const override;
+
+            virtual void            setNormalDir(NormalDirection ndir) override;
+            virtual NormalDirection getNormalDir() const override;
+
+        protected:
+            virtual void _remove(size_t i) override;
+            virtual void _clear() override;
+
+        protected:
+            PolygonType* _pol;
+    };
 }
 
 
@@ -283,6 +308,62 @@ namespace math
     NormalDirection BasePolygon<T>::getNormalDir() const
     {
         return _ndir;
+    }
+
+
+
+    // PolygonAdapter
+    template <typename T, typename PolygonType>
+    PolygonAdapter<T, PolygonType>::PolygonAdapter(PolygonType& pol) :
+        _pol(&pol)
+    { }
+
+    template <typename T, typename PolygonType>
+    bool PolygonAdapter<T, PolygonType>::isConvex() const
+    {
+        return _pol->isConvex();
+    }
+
+    template <typename T, typename PolygonType>
+    void PolygonAdapter<T, PolygonType>::setFillType(FillType filltype)
+    {
+        _pol->setFillType(filltype);
+    }
+
+    template <typename T, typename PolygonType>
+    FillType PolygonAdapter<T, PolygonType>::getFillType() const
+    {
+        return _pol->getFillType();
+    }
+
+    template <typename T, typename PolygonType>
+    void PolygonAdapter<T, PolygonType>::setNormalDir(NormalDirection ndir)
+    {
+        _pol->setNormalDir(ndir);
+    }
+
+    template <typename T, typename PolygonType>
+    NormalDirection PolygonAdapter<T, PolygonType>::getNormalDir() const
+    {
+        return _pol->getNormalDir();
+    }
+
+    template <typename T, typename PolygonType>
+    void PolygonAdapter<T, PolygonType>::_remove(size_t i)
+    {
+        _pol->remove(i);
+    }
+
+    template <typename T, typename PolygonType>
+    void PolygonAdapter<T, PolygonType>::_clear()
+    {
+        _pol->clear();
+    }
+
+    template <typename T, typename PolygonType>
+    size_t PolygonAdapter<T, PolygonType>::size() const
+    {
+        return _pol->size();
     }
 }
 #endif
