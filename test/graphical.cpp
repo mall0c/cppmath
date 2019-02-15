@@ -136,13 +136,14 @@ int main(int argc, char *argv[])
                         break;
 
                     case sf::Keyboard::C:
-                        if (cursor.type == Shape::Polygon)
-                            cursor.pol.closed = !cursor.pol.closed;
+                        if (cursor.pol.getFillType() == Open)
+                            cursor.pol.setFillType(Closed);
+                        else
+                            cursor.pol.setFillType(Open);
                         break;
 
                     case sf::Keyboard::F:
-                        if (cursor.type == Shape::Polygon)
-                            cursor.pol.filled = !cursor.pol.filled;
+                        cursor.pol.setFillType(Filled);
                         break;
 
                     default:
@@ -296,7 +297,7 @@ void Shape::render(sf::RenderTarget& target) const
     else if (type == Polygon)
     {
         pol.foreachSegment([&](const LineT& seg) {
-            drawLine(target, seg.p, seg.p + seg.d, pol.filled ? sf::Color::Red : defaultColor);
+            drawLine(target, seg.p, seg.p + seg.d, pol.getFillType() == Filled ? sf::Color::Red : defaultColor);
             return false;
         });
         drawRect(target, pol.getBBox(), sf::Color::Magenta);

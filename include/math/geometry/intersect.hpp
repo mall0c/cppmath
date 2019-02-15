@@ -50,7 +50,7 @@ namespace math
         Intersection<T> nearest;
 
         auto cb = [&](const Line2<T>& seg) {
-            auto isec = intersect(line, seg, pol.normaldir);
+            auto isec = intersect(line, seg, pol.getNormalDir());
             if (!nearest || (isec && isec.time < nearest.time))
                 nearest = isec;
             return false;
@@ -85,7 +85,7 @@ namespace math
             return isec;
 
         // Segment fully inside
-        if (pol.closed && pol.filled && line.type == Segment && intersect(line.p, pol))
+        if (pol.getFillType() == Filled && line.type == Segment && intersect(line.p, pol))
             return Intersection<T>(line.p, Vec2f(), Vec2f());
 
         return Intersection<T>();
@@ -104,7 +104,7 @@ namespace math
         if (!intersect(pol.getBBox(), point))
             return false;
 
-        if (pol.closed && pol.filled)
+        if (pol.getFillType() == Filled)
         {
             Line2<T> ray(point, Vec2<T>(1, 0), Ray);
             size_t num = 0;
@@ -145,7 +145,7 @@ namespace math
 
         Intersection<T> nearest;
         auto cb = [&](const Line2<T>& seg) {
-            auto isec = sweep(aabb, vel, seg, pol.normaldir);
+            auto isec = sweep(aabb, vel, seg, pol.getNormalDir());
             if (isec)
             {
                 if (backfaceCulling && isec.normal.dot(vel) > 0)

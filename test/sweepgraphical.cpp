@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
     create(shapes);
 
     OffsetPolygon<float> pol;
-    pol.normaldir = NormalLeft;
+    pol.setNormalDir(NormalLeft);
     pol.add(PointT(150, HEIGHT / 2));
     pol.add(PointT(WIDTH / 2, 100));
     pol.add(PointT(WIDTH - 150, HEIGHT / 2));
@@ -123,11 +123,14 @@ int main(int argc, char *argv[])
                         break;
 
                     case sf::Keyboard::C:
-                        pol.closed = !pol.closed;
+                        if (pol.getFillType() == Open)
+                            pol.setFillType(Closed);
+                        else
+                            pol.setFillType(Open);
                         break;
 
                     case sf::Keyboard::F:
-                        pol.filled = !pol.filled;
+                        pol.setFillType(Filled);
                         break;
                 }
             }
@@ -174,7 +177,7 @@ int main(int argc, char *argv[])
         }
 
         pol.foreachSegment([&](const LineT& seg) {
-            drawLine(window, seg.p, seg.p + seg.d, pol.filled ? sf::Color::Red : defaultColor);
+            drawLine(window, seg.p, seg.p + seg.d, pol.getFillType() == Filled ? sf::Color::Red : defaultColor);
             return false;
         });
 

@@ -5,12 +5,17 @@
 
 namespace math
 {
+    enum FillType
+    {
+        Open,
+        Closed,
+        Filled
+    };
+
     template <typename T>
     class AbstractPolygon
     {
         public:
-            AbstractPolygon();
-            AbstractPolygon(bool closed, bool filled, NormalDirection ndir);
             virtual ~AbstractPolygon() {}
 
             virtual void      add(const Point2<T>& point)          = 0;
@@ -23,6 +28,12 @@ namespace math
             virtual AABB<T>   getBBox() const                      = 0;
             virtual bool      isConvex() const                     = 0;
 
+            virtual void     setFillType(FillType filltype) = 0;
+            virtual FillType getFillType() const = 0;
+
+            virtual void            setNormalDir(NormalDirection ndir) = 0;
+            virtual NormalDirection getNormalDir() const = 0;
+
             // Return a line segment from point i to point j.
             Line2<T> getSegment(size_t i, size_t j) const;
 
@@ -31,11 +42,6 @@ namespace math
             // Callback signature: bool (const Line2<T>&)
             template <typename F>
             void foreachSegment(F f) const;
-
-        public:
-            bool closed;
-            bool filled;
-            NormalDirection normaldir;
 
         protected:
             // NOTE: these are intentionally not the default for the
@@ -52,7 +58,7 @@ namespace math
     {
         public:
             BasePolygon();
-            BasePolygon(bool closed, bool filled, NormalDirection ndir);
+            BasePolygon(FillType filltype, NormalDirection ndir);
             virtual ~BasePolygon() {};
 
             void add(const Point2<T>& point)          final;
@@ -61,8 +67,14 @@ namespace math
             void remove(size_t i)                     final;
             void clear()                              final;
 
-            virtual AABB<T> getBBox() const     override;
-            virtual bool    isConvex() const    override;
+            virtual AABB<T> getBBox() const override;
+            virtual bool    isConvex() const override;
+
+            virtual void     setFillType(FillType filltype) override;
+            virtual FillType getFillType() const override;
+
+            virtual void            setNormalDir(NormalDirection ndir) override;
+            virtual NormalDirection getNormalDir() const override;
 
         protected:
             // Called whenever the vertex list changed
@@ -75,6 +87,8 @@ namespace math
             virtual void _clear()                              = 0;
 
         protected:
+            FillType _filltype;
+            NormalDirection _ndir;
             mutable AABB<T> _bbox;
             mutable bool _convex;
             mutable bool _bboxdirty;
@@ -91,18 +105,6 @@ namespace math
 {
     // AbstractPolygon
     template <typename T>
-    AbstractPolygon<T>::AbstractPolygon() :
-        AbstractPolygon(true, true, NormalBoth)
-    { }
-
-    template <typename T>
-    AbstractPolygon<T>::AbstractPolygon(bool closed_, bool filled_, NormalDirection ndir) :
-        closed(closed_),
-        filled(filled_),
-        normaldir(ndir)
-    { }
-
-    template <typename T>
     Line2<T> AbstractPolygon<T>::getSegment(size_t i, size_t j) const
     {
         return Line2<T>(get(i), get(j), Segment);
@@ -115,7 +117,7 @@ namespace math
         for (size_t i = 1; i < size(); ++i)
             if (f(getSegment(i - 1, i)))
                 return;
-        if (closed && size() > 2)
+        if (getFillType() != Open && size() > 2)
             f(getSegment(size() - 1, 0));
     }
 
@@ -173,17 +175,14 @@ namespace math
     // BasePolygon
     template <typename T>
     BasePolygon<T>::BasePolygon() :
-        _convex(false),
-        _bboxdirty(true),
-        _convexdirty(true)
-        // NOTE: BBox and convexity should recalculate because it doesn't
-        //       know if derived classes automatically add some vertices.
+        BasePolygon(Filled, NormalBoth)
     { }
 
     // BasePolygon
     template <typename T>
-    BasePolygon<T>::BasePolygon(bool closed, bool filled, NormalDirection ndir) :
-        AbstractPolygon<T>(closed, filled, ndir),
+    BasePolygon<T>::BasePolygon(FillType filltype, NormalDirection ndir) :
+        _filltype(filltype),
+        _ndir(ndir),
         _convex(false),
         _bboxdirty(true),
         _convexdirty(true)
@@ -259,6 +258,31 @@ namespace math
             _convexdirty = false;
         }
         return _convex;
+    }
+
+    template <typename T>
+    void BasePolygon<T>::setFillType(FillType filltype)
+    {
+        _filltype = filltype;
+    }
+
+    template <typename T>
+    FillType BasePolygon<T>::getFillType() const
+    {
+        return _filltype;
+    }
+
+
+    template <typename T>
+    void BasePolygon<T>::setNormalDir(NormalDirection ndir)
+    {
+        _ndir = ndir;
+    }
+
+    template <typename T>
+    NormalDirection BasePolygon<T>::getNormalDir() const
+    {
+        return _ndir;
     }
 }
 #endif
