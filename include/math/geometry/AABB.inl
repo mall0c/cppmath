@@ -30,7 +30,7 @@ namespace math
     }
 
     template <typename T>
-    AABB<T> fromPoints(const Point2<T>& a, const Point2<T>& b)
+    AABB<T> AABB<T>::fromPoints(const Point2<T>& a, const Point2<T>& b)
     {
         return AABB<T>(
                 std::min(a.x, b.x),
