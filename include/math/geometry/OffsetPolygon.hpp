@@ -7,7 +7,7 @@
 namespace math
 {
     template <typename T>
-    class OffsetPolygon : public BasePolygon<float>
+    class OffsetPolygon : public BasePolygon<T>
     {
         public:
             OffsetPolygon();
@@ -50,9 +50,9 @@ namespace math
     template <typename T>
     void OffsetPolygon<T>::setOffset(const Vec2<T>& offset)
     {
-        _bbox.pos += (offset - _offset);
+        this->_bbox.pos += (offset - _offset);
         _offset = offset;
-        _onVertexChanged();
+        this->_onVertexChanged();
     }
 
     template <typename T>
