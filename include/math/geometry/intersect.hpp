@@ -1,11 +1,13 @@
-#ifndef MATH_INTERSECTION_HPP
-#define MATH_INTERSECTION_HPP
+#ifndef MATH_INTERSECT_FUNCTIONS_HPP
+#define MATH_INTERSECT_FUNCTIONS_HPP
 
-#include "Polygon.hpp"
 #include "Intersection.hpp"
 
 namespace math
 {
+    template <typename T>
+    class AbstractPolygon;
+
     template <typename T> Intersection<T> intersect(const Line2<T>& line, const AbstractPolygon<T>& pol);
     template <typename T> bool            intersect(const Point2<T>& point, const AbstractPolygon<T>& pol);
 
@@ -35,6 +37,7 @@ namespace math
 }
 
 
+#include "Polygon.hpp"
 #include <cassert>
 
 // Implementation

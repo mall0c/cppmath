@@ -1,7 +1,5 @@
-#ifndef CPPMATH_BASE_POINT_SET_HPP
-#define CPPMATH_BASE_POINT_SET_HPP
-
-#include "Line2.hpp"
+#ifndef CPPMATH_POLYGON_HPP
+#define CPPMATH_POLYGON_HPP
 
 namespace math
 {
@@ -11,31 +9,25 @@ namespace math
         Closed,
         Filled
     };
+}
 
+#include "PointSet.hpp"
+
+namespace math
+{
     template <typename T>
-    class AbstractPolygon
+    class AbstractPolygon : public AbstractPointSet<T>
     {
         public:
             virtual ~AbstractPolygon() {}
 
-            virtual void      add(const Point2<T>& point)          = 0;
-            virtual void      edit(size_t i, const Point2<T>& p)   = 0;
-            virtual void      insert(size_t i, const Point2<T>& p) = 0;
-            virtual void      remove(size_t i)                     = 0;
-            virtual void      clear()                              = 0;
-            virtual size_t    size() const                         = 0;
-            virtual Point2<T> get(size_t i) const                  = 0;
-            virtual AABB<T>   getBBox() const                      = 0;
-            virtual bool      isConvex() const                     = 0;
+            virtual bool isConvex() const = 0;
 
             virtual void     setFillType(FillType filltype) = 0;
             virtual FillType getFillType() const = 0;
 
             virtual void            setNormalDir(NormalDirection ndir) = 0;
             virtual NormalDirection getNormalDir() const = 0;
-
-            // Return a line segment from point i to point j.
-            Line2<T> getSegment(size_t i, size_t j) const;
 
             // Calls a lambda for each two consecutive points.
             // Returning true breaks the loop.
@@ -44,15 +36,15 @@ namespace math
             void foreachSegment(F f) const;
 
         protected:
-            // NOTE: these are intentionally not the default for the
-            //       respective virtual functions as they are not cached
-            //       but recalculate on every call.
-            AABB<T> _calculateBBox() const;
+            // NOTE: this is intentionally not the default for isConvex()
+            //       as it is not cached but recalculate on every call.
             bool _calculateConvex() const;
     };
 
 
     // TODO: find a better class name
+    // NOTE: if you change something from the lazy bbox logic,
+    //       you probably want to change it in BasePointSet, too.
     template <typename T>
     class BasePolygon : public AbstractPolygon<T>
     {
@@ -130,44 +122,15 @@ namespace math
 {
     // AbstractPolygon
     template <typename T>
-    Line2<T> AbstractPolygon<T>::getSegment(size_t i, size_t j) const
-    {
-        return Line2<T>(get(i), get(j), Segment);
-    }
-
-    template <typename T>
     template <typename F>
     void AbstractPolygon<T>::foreachSegment(F f) const
     {
-        for (size_t i = 1; i < size(); ++i)
-            if (f(getSegment(i - 1, i)))
+        auto size = this->size();
+        for (size_t i = 1; i < size; ++i)
+            if (f(this->getSegment(i - 1, i)))
                 return;
-        if (getFillType() != Open && size() > 2)
-            f(getSegment(size() - 1, 0));
-    }
-
-    template <typename T>
-    AABB<T> AbstractPolygon<T>::_calculateBBox() const
-    {
-        if (this->size() < 2)
-        {
-            return AABB<T>();
-        }
-
-        Vec2f min = this->get(0).asVector(),
-              max = this->get(0).asVector();
-
-        for (size_t i = 1; i < this->size(); ++i)
-        {
-            auto p = this->get(i);
-            for (int k = 0; k < 2; ++k)
-            {
-                min[k] = std::min(min[k], p[k]);
-                max[k] = std::max(max[k], p[k]);
-            }
-        }
-
-        return AABB<T>(min.asPoint(), max - min);
+        if (getFillType() != Open && size > 2)
+            f(this->getSegment(size - 1, 0));
     }
 
     template <typename T>
