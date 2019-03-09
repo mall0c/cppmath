@@ -41,11 +41,11 @@ namespace math
             BasePointSet();
             virtual ~BasePointSet() {};
 
-            void add(const Point2<T>& point)          final;
-            void edit(size_t i, const Point2<T>& p)   final;
-            void insert(size_t i, const Point2<T>& p) final;
-            void remove(size_t i)                     final;
-            void clear()                              final;
+            void add(const Point2<T>& point)          final override;
+            void edit(size_t i, const Point2<T>& p)   final override;
+            void insert(size_t i, const Point2<T>& p) final override;
+            void remove(size_t i)                     final override;
+            void clear()                              final override;
 
             virtual AABB<T> getBBox() const override;
 

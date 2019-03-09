@@ -11,7 +11,7 @@ add_library(${PROJECT_NAME} src/math/math.cpp)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
 
 if (CMAKE_COMPILER_IS_GNUCC)
-    add_definitions(-Wall -Wno-switch -Wno-parentheses)
+    add_definitions(-Wall -Wno-switch -Wno-parentheses -Wsuggest-override -Werror=suggest-override)
 elseif (MSVC)
     # Untested
     add_definitions(/W3)

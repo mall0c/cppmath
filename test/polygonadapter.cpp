@@ -10,12 +10,12 @@ class Adapter : public PolygonAdapter<float, OffsetPolygon<float>>
         Adapter(OffsetPolygon<float>& pol);
         virtual ~Adapter() {};
 
-        Point2f get(size_t i) const final;
+        Point2f get(size_t i) const final override;
 
     protected:
-        void _add(const Point2f& point) final;
-        void _edit(size_t i, const Point2f& p) final;
-        void _insert(size_t i, const Point2f& p) final;
+        void _add(const Point2f& point) final override;
+        void _edit(size_t i, const Point2f& p) final override;
+        void _insert(size_t i, const Point2f& p) final override;
 };
 
 
