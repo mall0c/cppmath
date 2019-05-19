@@ -8,6 +8,8 @@ namespace math
     template <typename T>
     class AbstractPolygon;
 
+    template <typename T> bool            intersect(const Point2<T>& point, const Point2<T>& a, const Point2<T>& b, const Point2<T>& c);
+
     template <typename T> Intersection<T> intersect(const Line2<T>& line, const AbstractPolygon<T>& pol);
     template <typename T> bool            intersect(const Point2<T>& point, const AbstractPolygon<T>& pol);
 
@@ -73,6 +75,17 @@ namespace math
         return true;
     }
 
+    template <typename T>
+    bool intersect(const Point2<T>& p, const Point2<T>& a, const Point2<T>& b, const Point2<T>& c)
+    {
+        auto pab = (p - a).cross(b - a);
+        auto pbc = (p - b).cross(c - b);
+
+        if (sign(pab) != sign(pbc))
+            return false;
+
+        return sign(pab) == sign((p - c).cross(a - c));
+    }
 
     template <typename T>
     Intersection<T> intersect(const Line2<T>& line, const AbstractPolygon<T>& pol)
