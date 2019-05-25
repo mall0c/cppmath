@@ -263,7 +263,7 @@ namespace math
 
     template <typename T, size_t N>
     template <typename T2>
-    Vector<T, N>::res_type<T2> Vector<T, N>::operator+(const other_type<T2>& p) const
+    auto Vector<T, N>::operator+(const other_type<T2>& p) const -> Vector<T, N>::res_type<T2>
     {
         res_type<T2> vec(*this);
         vec += p;
@@ -288,7 +288,7 @@ namespace math
 
     template <typename T, size_t N>
     template <typename T2>
-    Vector<T, N>::res_type<T2> Vector<T, N>::operator-(const other_type<T2>& p) const
+    auto Vector<T, N>::operator-(const other_type<T2>& p) const -> Vector<T, N>::res_type<T2>
     {
         res_type<T2> vec(*this);
         _FOREACH_VECTOR(i, vec[i] -= p[i];)
@@ -305,7 +305,7 @@ namespace math
 
     template <typename T, size_t N>
     template <typename T2>
-    Vector<T, N>::res_type<T2> Vector<T, N>::operator*(const other_type<T2>& p) const
+    auto Vector<T, N>::operator*(const other_type<T2>& p) const -> Vector<T, N>::res_type<T2>
     {
         res_type<T2> vec(*this);
         _FOREACH_VECTOR(i, vec[i] *= p[i];)
@@ -314,7 +314,7 @@ namespace math
 
     template <typename T, size_t N>
     template <typename T2>
-    Vector<T, N>::res_type<T2> Vector<T, N>::operator*(const T2& val) const
+    auto Vector<T, N>::operator*(const T2& val) const -> Vector<T, N>::res_type<T2>
     {
         res_type<T2> vec(*this);
         _FOREACH_VECTOR(i, vec[i] *= val;)
@@ -339,7 +339,7 @@ namespace math
 
     template <typename T, size_t N>
     template <typename T2>
-    Vector<T, N>::res_type<T2> Vector<T, N>::operator/(const other_type<T2>& p) const
+    auto Vector<T, N>::operator/(const other_type<T2>& p) const -> Vector<T, N>::res_type<T2>
     {
         res_type<T2> vec(*this);
         _FOREACH_VECTOR(i, vec[i] /= p[i];)
@@ -348,7 +348,7 @@ namespace math
 
     template <typename T, size_t N>
     template <typename T2>
-    Vector<T, N>::res_type<T2> Vector<T, N>::operator/(const T2& val) const
+    auto Vector<T, N>::operator/(const T2& val) const -> Vector<T, N>::res_type<T2>
     {
         res_type<T2> vec(*this);
         _FOREACH_VECTOR(i, vec[i] /= val;)
