@@ -127,7 +127,8 @@ namespace math
     template <typename T, size_t N> __LIMITDIM_IMPL
     double Vector<T, N>::angle_rad() const
     {
-        return atan2(this->y, this->x);
+        auto rad = -atan2(this->y, this->x);
+        return rad >= 0 ? rad : 2 * M_PI + rad;
     }
 
     template <typename T, size_t N> __LIMITDIM_IMPL
