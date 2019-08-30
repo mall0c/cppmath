@@ -258,7 +258,7 @@ namespace math
     template <typename T, size_t N> __LIMITDIM_IMPL
     Vector<T, N> Vector<T, N>::fromAngle(float len, float dir)
     {
-        return type(len * cos(degtorad(dir)), len * sin(degtorad(dir)));
+        return type(len * cos(degtorad(dir)), len * -sin(degtorad(dir)));
     }
 
 
