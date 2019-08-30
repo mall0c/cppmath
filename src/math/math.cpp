@@ -27,6 +27,6 @@ namespace math
 
     double adaptDirection(double dir)
     {
-        return (dir < 0 ? 360 : 0) + fmod(dir, 360.0);
+        return wrap(dir, 360.0);
     }
 }

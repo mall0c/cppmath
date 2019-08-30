@@ -18,22 +18,20 @@ namespace math
 
     double adaptDirection(double dir);
 
-    // modulo where negative values wrap around,
-    // e.g. -1 -> max - 1
-    //       1 -> 1
-    // adapted from here: https://stackoverflow.com/a/39740009
-    constexpr int wrap(int i, int mod, int min, int max)
+    template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+    T wrap(T i, T mod)
     {
-        return (mod >= 0) ?
-            (i + mod - min) % max + min
-            :
-            ((i + mod) + max * (-mod) - min) % max + min;
+        T a = i % mod;
+        return a < T() ? mod + a : a;
     }
 
-    constexpr int wrap(int i, int mod)
+    template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type = 0>
+    T wrap(T i, T mod)
     {
-        return wrap(i, mod, 0, mod);
+        T a = std::fmod(i, mod);
+        return a < T() ? mod + a : a;
     }
+
 
     template <typename T, typename T2>
     constexpr T snap(T x, T2 gridsize)
