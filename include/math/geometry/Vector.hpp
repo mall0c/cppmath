@@ -67,8 +67,8 @@ namespace math
             T dot(const type& vec) const;
             T project(const type& vec) const;
 
-            // Returns the angle between this and another vector in
-            // degrees/radians/cosines.
+            // Returns the (signed) angle between this and another vector in
+            // degrees/radians/cosines. Signed only for degrees and radians..
             double angle(const type& vec) const;
             double angle_rad(const type& vec) const;
             double angle_cos(const type& vec) const;

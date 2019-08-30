@@ -109,7 +109,7 @@ namespace math
     template <typename T, size_t N>
     double Vector<T, N>::angle_rad(const type& vec) const
     {
-        return acos(angle_cos(vec));
+        return acos(angle_cos(vec)) * math::sign(this->cross(vec));
     }
 
     template <typename T, size_t N>
